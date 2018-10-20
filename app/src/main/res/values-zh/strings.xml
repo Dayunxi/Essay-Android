@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">随记</string>
+    <string name="navigation_drawer_open">打开侧栏</string>
+    <string name="navigation_drawer_close">关闭侧栏</string>
+    <string name="nav_header_title">未登录</string>
+    <string name="nav_header_subtitle">adam.yangt@gmail.com</string>
+    <string name="nav_header_desc">用户头像</string>
+    <string name="action_settings">Settings</string>
+    <string name="nav_menu_authorize">授权</string>
+    <string name="nav_menu_import">导入</string>
+    <string name="nav_menu_export">导出</string>
+    <string name="nav_menu_settings">设置</string>
+    <string name="nav_menu_about">关于</string>
+    <string name="nav_menu_logout">注销</string>
+</resources>
