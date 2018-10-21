@@ -15,4 +15,8 @@
     <string name="editor_toolbar_cancel">Cancel</string>
     <string name="editor_toolbar_save">Save</string>
     <string name="editor_placeholder">Write down your thought</string>
+    <string name="confirm_save_draft">Save to draft box?</string>
+    <string name="confirm_yes">Yes</string>
+    <string name="confirm_no">No</string>
+    <string name="confirm_cancel">Cancel</string>
 </resources>

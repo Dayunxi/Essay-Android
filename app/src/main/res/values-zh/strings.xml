@@ -16,4 +16,8 @@
     <string name="editor_toolbar_cancel">取消</string>
     <string name="editor_toolbar_save">保存</string>
     <string name="editor_placeholder">写点什么吧&#8230;</string>
+    <string name="confirm_save_draft">是否保存至草稿箱？</string>
+    <string name="confirm_yes">是</string>
+    <string name="confirm_no">否</string>
+    <string name="confirm_cancel">取消</string>
 </resources>
