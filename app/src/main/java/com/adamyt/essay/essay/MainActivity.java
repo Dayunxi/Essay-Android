@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity
 //                EditText editText = findViewById(R.id.editText);
 //                String message = editText.getText().toString();
 //                intent.putExtra(EXTRA_MESSAGE, message);
+//                Toast.makeText(MainActivity.this, "hhhh", Toast.LENGTH_SHORT).show();
                 startActivity(intent);
             }
         });

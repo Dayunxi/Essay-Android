@@ -13,4 +13,7 @@
     <string name="nav_menu_settings">设置</string>
     <string name="nav_menu_about">关于</string>
     <string name="nav_menu_logout">注销</string>
+    <string name="editor_toolbar_cancel">取消</string>
+    <string name="editor_toolbar_save">保存</string>
+    <string name="editor_placeholder">写点什么吧&#8230;</string>
 </resources>

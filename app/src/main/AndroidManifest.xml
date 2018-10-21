@@ -19,13 +19,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditActivity"
-            android:parentActivityName=".MainActivity" >
-            <!-- The meta-data tag is required if you support API level 15 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+        <activity
+            android:name=".EditActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <!--<activity-->
+            <!--android:name=".EditActivity"-->
+            <!--android:label="rrr"-->
+            <!--android:theme="@style/AppTheme.NoActionBar"-->
+            <!--android:parentActivityName=".MainActivity" >-->
+            <!--&lt;!&ndash; The meta-data tag is required if you support API level 15 and lower &ndash;&gt;-->
+            <!--<meta-data-->
+                <!--android:name="android.support.PARENT_ACTIVITY"-->
+                <!--android:value=".MainActivity" />-->
+        <!--</activity>-->
     </application>
 
 </manifest>
