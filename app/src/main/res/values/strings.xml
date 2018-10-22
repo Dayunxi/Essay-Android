@@ -22,4 +22,8 @@
     <string name="confirm_yes">Yes</string>
     <string name="confirm_no">No</string>
     <string name="confirm_cancel">Cancel</string>
+    <string name="essay_untitled">Untitled</string>
+    <string name="essay_date">2018/10/22 21:32</string>
+    <string name="essay_img_des">private icon or public icon</string>
+    <string name="essay_list_empty">No Essay</string>
 </resources>

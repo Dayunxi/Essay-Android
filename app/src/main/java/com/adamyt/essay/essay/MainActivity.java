@@ -1,6 +1,7 @@
 package com.adamyt.essay.essay;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -13,11 +14,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.adamyt.essay.utils.EssayBean;
+import com.adamyt.essay.utils.EssayUtils;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private ArrayList<EssayBean> mList;
 
     public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
     public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
@@ -49,6 +62,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        loadEssay();
     }
 
     @Override
@@ -120,5 +135,64 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void loadEssay() {
+        mList = EssayUtils.getAllEssay(this);
+        ListView lv = findViewById(R.id.essay_list);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent();
+//                intent.setAction(Intent.ACTION_VIEW);
+//                intent.setData(Uri.parse(mList.get(position).essayUrl));
+//                startActivity(intent);
+            }
+        });
+        lv.setAdapter(new EssayAdapter());
+    }
+
+    private class EssayAdapter extends BaseAdapter {
+        @Override
+        public int getCount() {
+            return mList.size();
+        }
+
+        @Override
+        public EssayBean getItem(int position) {
+            return mList.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = View.inflate(getApplicationContext(), R.layout.essay_list_item, null);
+                holder.lv_title = convertView.findViewById(R.id.lv_title);
+                holder.lv_date = convertView.findViewById(R.id.lv_date);
+                holder.lv_icon = convertView.findViewById(R.id.lv_icon);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+            EssayBean item = getItem(position);
+            holder.lv_title.setText(item.title);
+            holder.lv_date.setText(item.date.toString());
+            holder.lv_icon.setImageDrawable(item.icon);
+            return convertView;
+        }
+    }
+
+    private static class ViewHolder {
+        TextView lv_title;
+        TextView lv_date;
+        ImageView lv_icon;
     }
 }

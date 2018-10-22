@@ -22,4 +22,8 @@
     <string name="confirm_yes">是</string>
     <string name="confirm_no">否</string>
     <string name="confirm_cancel">取消</string>
+    <string name="essay_untitled">无题</string>
+    <string name="essay_date">2018/10/22 21:32</string>
+    <string name="essay_img_des">私有或公开图标</string>
+    <string name="essay_list_empty">暂无随笔</string>
 </resources>
