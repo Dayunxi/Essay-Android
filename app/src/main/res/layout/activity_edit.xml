@@ -7,44 +7,50 @@
     android:fitsSystemWindows="true"
     tools:context=".EditActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/edit_activity_toolbar"
+    <include
+        android:id="@+id/edit_activity_include"
+        layout="@layout/review_modify_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:popupTheme="@style/AppTheme.PopupOverlay">
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/editor_activity_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="@string/editor_toolbar_cancel"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="18dp" />
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/edit_activity_toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="?attr/colorPrimary"-->
+        <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/app_name"
-            style="@style/AppTheme.ToolBarTitle"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="18dp" />
+        <!--<TextView-->
+            <!--android:id="@+id/editor_activity_cancel"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="start"-->
+            <!--android:layout_marginStart="16dp"-->
+            <!--android:layout_marginLeft="16dp"-->
+            <!--android:text="@string/editor_toolbar_cancel"-->
+            <!--tools:layout_editor_absoluteX="16dp"-->
+            <!--tools:layout_editor_absoluteY="18dp" />-->
 
-        <TextView
-            android:id="@+id/editor_activity_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:text="@string/editor_toolbar_save"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="18dp" />
-    </android.support.v7.widget.Toolbar>
+        <!--<TextView-->
+            <!--style="@style/AppTheme.ToolBarTitle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:text="@string/app_name"-->
+            <!--tools:layout_editor_absoluteX="16dp"-->
+            <!--tools:layout_editor_absoluteY="18dp" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/editor_modify_or_save"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:layout_marginEnd="16dp"-->
+            <!--android:layout_marginRight="16dp"-->
+            <!--android:text="@string/editor_toolbar_modify"-->
+            <!--tools:layout_editor_absoluteX="16dp"-->
+            <!--tools:layout_editor_absoluteY="18dp" />-->
+    <!--</android.support.v7.widget.Toolbar>-->
 
 
     <ScrollView
@@ -53,7 +59,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_activity_toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/edit_activity_include">
 
         <EditText
             android:id="@+id/editEssay"
@@ -70,8 +76,7 @@
             android:inputType="textMultiLine"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+            app:layout_constraintStart_toStartOf="parent" />
     </ScrollView>
 
 

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">随记</string>
     <string name="navigation_drawer_open">打开侧栏</string>
@@ -13,8 +12,11 @@
     <string name="nav_menu_settings">设置</string>
     <string name="nav_menu_about">关于</string>
     <string name="nav_menu_logout">注销</string>
+    <string name="editor_toolbar_back">返回</string>
     <string name="editor_toolbar_cancel">取消</string>
     <string name="editor_toolbar_save">保存</string>
+    <string name="editor_toolbar_done">完成</string>
+    <string name="editor_toolbar_modify">修改</string>
     <string name="editor_placeholder">写点什么吧&#8230;</string>
     <string name="confirm_save_draft">是否保存至草稿箱？</string>
     <string name="confirm_yes">是</string>

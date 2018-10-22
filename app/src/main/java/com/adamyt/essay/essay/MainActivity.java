@@ -19,6 +19,9 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
+    public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,10 +36,7 @@ public class MainActivity extends AppCompatActivity
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
-//                EditText editText = findViewById(R.id.editText);
-//                String message = editText.getText().toString();
-//                intent.putExtra(EXTRA_MESSAGE, message);
-//                Toast.makeText(MainActivity.this, "hhhh", Toast.LENGTH_SHORT).show();
+                intent.putExtra(IS_NEW, true);
                 startActivity(intent);
             }
         });

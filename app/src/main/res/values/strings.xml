@@ -12,10 +12,13 @@
     <string name="nav_menu_settings">Settings</string>
     <string name="nav_menu_about">About</string>
     <string name="nav_menu_logout">Logout</string>
+    <string name="editor_toolbar_back">Back</string>
     <string name="editor_toolbar_cancel">Cancel</string>
     <string name="editor_toolbar_save">Save</string>
+    <string name="editor_toolbar_done">Done</string>
+    <string name="editor_toolbar_modify">Modify</string>
     <string name="editor_placeholder">Write down your thought</string>
-    <string name="confirm_save_draft">Save to draft box?</string>
+    <string name="confirm_save_draft">Do you want to save as a draft?</string>
     <string name="confirm_yes">Yes</string>
     <string name="confirm_no">No</string>
     <string name="confirm_cancel">Cancel</string>
