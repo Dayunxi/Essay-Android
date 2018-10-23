@@ -16,7 +16,7 @@
         android:src="@mipmap/ic_launcher"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/essay_img_des"
-        tools:srcCompat="@drawable/ic_menu_lock_open" />
+        tools:srcCompat="@drawable/ic_lock_open_black" />
 
     <LinearLayout
         android:layout_width="wrap_content"

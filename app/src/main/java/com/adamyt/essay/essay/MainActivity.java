@@ -3,6 +3,7 @@ package com.adamyt.essay.essay;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -26,11 +27,13 @@ import android.widget.Toast;
 import com.adamyt.essay.utils.EssayBean;
 import com.adamyt.essay.utils.EssayUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private ArrayList<EssayBean> mList;
+    private ArrayList<EssayBean> essayList;
 
     public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
     public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
@@ -100,21 +103,35 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         switch (id){
             case R.id.nav_authorize:
+                System.out.println("nav_authorize");
                 break;
-            case R.id.nav_import:
+            case R.id.nav_drafts:
+                System.out.println("nav_drafts");
                 break;
-            case R.id.nav_export:
+            case R.id.nav_register:
+                System.out.println("nav_register");
+                Intent intent = new Intent(this, RegisterActivity.class);
+                startActivity(intent);
                 break;
+//            case R.id.nav_import:
+//                System.out.println("nav_import");
+//                break;
+//            case R.id.nav_export:
+//                System.out.println("nav_export");
+//                break;
             case R.id.nav_setting:
+                System.out.println("nav_setting");
                 break;
-            case R.id.nav_about:
-                break;
+//            case R.id.nav_about:
+//                System.out.println("nav_about");
+//                break;
             case R.id.nav_logout:
+                System.out.println("nav_logout");
                 break;
         }
 
@@ -138,15 +155,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadEssay() {
-        mList = EssayUtils.getAllEssay(this);
+        essayList = EssayUtils.getAllPublicEssay(this);
         ListView lv = findViewById(R.id.essay_list);
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent();
+                System.out.println(position);
 //                intent.setAction(Intent.ACTION_VIEW);
-//                intent.setData(Uri.parse(mList.get(position).essayUrl));
+//                intent.setData(Uri.parse(essayList.get(position).essayUrl));
 //                startActivity(intent);
             }
         });
@@ -156,12 +174,12 @@ public class MainActivity extends AppCompatActivity
     private class EssayAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            return mList.size();
+            return essayList.size();
         }
 
         @Override
         public EssayBean getItem(int position) {
-            return mList.get(position);
+            return essayList.get(position);
         }
 
         @Override
@@ -184,7 +202,8 @@ public class MainActivity extends AppCompatActivity
             }
             EssayBean item = getItem(position);
             holder.lv_title.setText(item.title);
-            holder.lv_date.setText(item.date.toString());
+//            System.out.println(Locale.getDefault());
+            holder.lv_date.setText((new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())).format(item.date));
             holder.lv_icon.setImageDrawable(item.icon);
             return convertView;
         }

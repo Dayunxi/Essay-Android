@@ -1,6 +1,7 @@
 package com.adamyt.essay.utils;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 
 import com.adamyt.essay.essay.R;
 
@@ -8,13 +9,16 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class EssayUtils {
-    public static ArrayList<EssayBean> getAllEssay(Context context){
+    public static ArrayList<EssayBean> getAllPublicEssay(Context context){
         ArrayList<EssayBean> essayList = new ArrayList<>();
-        for(int i=0; i<10; i++){
+        int iconLockUri;
+        for(int i=0; i<20; i++){
             EssayBean essayBean = new EssayBean();
-            essayBean.title = "俺寻思";
+            essayBean.title = "俺寻思"+i;
             essayBean.date = new Date();
-            essayBean.icon = context.getResources().getDrawable(R.drawable.ic_menu_lock_open);
+            if((i&1)==0) iconLockUri = R.drawable.ic_lock_open_black;
+            else iconLockUri = R.drawable.ic_lock_black;
+            essayBean.icon = context.getResources().getDrawable(iconLockUri);
             essayBean.essayUrl = "/user/adam/34sa.lock";
             essayList.add(essayBean);
         }
