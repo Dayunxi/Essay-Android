@@ -1,11 +1,13 @@
 package com.adamyt.essay.essay;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -110,6 +112,7 @@ public class MainActivity extends AppCompatActivity
             // TODO: authorize dialog
             case R.id.nav_authorize:
                 System.out.println("nav_authorize");
+                showAuthorizeDialog();
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
@@ -139,6 +142,29 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void showAuthorizeDialog(){
+        View view = View.inflate(this, R.layout.authorize_input, null);
+        final EditText editText = (EditText) view.findViewById(R.id.authorize_password);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Authorize")//设置对话框的标题
+                .setView(view)
+                .setNegativeButton(R.string.confirm_no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.confirm_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String content = editText.getText().toString();
+                        Toast.makeText(MainActivity.this, content, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
     }
 
     private void loadEssay() {

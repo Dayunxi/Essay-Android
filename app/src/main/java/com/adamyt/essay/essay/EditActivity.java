@@ -131,35 +131,10 @@ public class EditActivity extends AppCompatActivity {
 //    private void draftAlertDialog(){
 //        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 //        dialog.setMessage(R.string.confirm_save_draft);
-//        dialog.setNegativeButton(R.string.confirm_no, new DialogInterface.OnClickListener(){
-//            @Override
-//            public void onClick(DialogInterface dialog, int which){
-//                dialog.dismiss();
-//                if(!isNew){
-//                    editText.setText(originText);
-//                    switchToReview();
-//                }
-//                else finish();
-//            }
-//        });
 //        dialog.setNeutralButton(R.string.confirm_cancel, new DialogInterface.OnClickListener(){
 //            @Override
 //            public void onClick(DialogInterface dialog, int which){
 //                dialog.dismiss();
-//            }
-//        });
-//        dialog.setPositiveButton(R.string.confirm_yes, new DialogInterface.OnClickListener(){
-//            @Override
-//            public void onClick(DialogInterface dialog, int which){
-//                //
-//
-//                dialog.dismiss();
-//                if(!isNew){
-//                    editText.setText(originText);
-//                    switchToReview();
-//                    Toast.makeText(EditActivity.this, "switch to review mode", Toast.LENGTH_SHORT).show();
-//                }
-//                else finish();
 //            }
 //        });
 //        dialog.show();
