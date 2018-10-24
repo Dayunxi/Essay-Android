@@ -1,21 +1,29 @@
 package com.adamyt.essay.essay;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
+
+import com.adamyt.essay.utils.EssayUtils;
+
+import java.io.File;
 
 public class EditActivity extends AppCompatActivity {
 
@@ -59,6 +67,7 @@ public class EditActivity extends AppCompatActivity {
             switchToReview();
         }
 
+
         // review toolbar 
         textViewBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,10 +105,32 @@ public class EditActivity extends AppCompatActivity {
         textViewDone.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
+                if(EssayUtils.needRequestWrite(EditActivity.this)) return;
                 //save to local as cipher text or plain text
 
+                File dir = new File(EssayUtils.essayUserDir);
+                if(!dir.exists()){
+                    if(!dir.mkdir())
+                        Toast.makeText(EditActivity.this, "Can't mkdir", Toast.LENGTH_SHORT).show();
+                    else{   //TODO: ./user/username/essay.json
+                        Toast.makeText(EditActivity.this, EssayUtils.essayUserDir, Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+                Toast.makeText(EditActivity.this, "saved", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults){
+        if(requestCode == EssayUtils.REQUEST_WRITE_SOTRAGE){
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+        }
     }
     
     private void switchToReview(){
@@ -110,7 +141,6 @@ public class EditActivity extends AppCompatActivity {
         editText.setTextColor(Color.BLACK);
         reviewBar.setVisibility(View.VISIBLE);
         modifyBar.setVisibility(View.GONE);
-//        Toast.makeText(EditActivity.this, "Review Model!", Toast.LENGTH_SHORT).show();
     }
     private void switchToModify(){
         editText.setFocusable(true);
@@ -120,7 +150,6 @@ public class EditActivity extends AppCompatActivity {
         modifyBar.setVisibility(View.VISIBLE);
         reviewBar.setVisibility(View.GONE);
         editText.requestFocus();
-//        Toast.makeText(EditActivity.this, "Modify Model!", Toast.LENGTH_SHORT).show();
     }
 
     private void saveAsDraft(){
@@ -148,18 +177,10 @@ public class EditActivity extends AppCompatActivity {
         dialog.setContentView(view);
         //点击对话框外部消失
         dialog.setCanceledOnTouchOutside(true);
-//        //设置对话框的大小
-//        view.setMinimumHeight((int) (ScreenSizeUtils.getInstance(this).getScreenHeight() * 0.23f));
-//        Window dialogWindow = dialog.getWindow();
-//        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-//        lp.width = (int) (ScreenSizeUtils.getInstance(this).getScreenWidth() * 0.75f);
-//        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//        lp.gravity = Gravity.CENTER;
-//        dialogWindow.setAttributes(lp);
+
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(EditActivity.this, "No", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
                 if(!isNew){
                     editText.setText(originText);
@@ -171,7 +192,6 @@ public class EditActivity extends AppCompatActivity {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(EditActivity.this, "Yes", Toast.LENGTH_SHORT).show();
                 saveAsDraft();
                 dialog.dismiss();
                 if(!isNew){

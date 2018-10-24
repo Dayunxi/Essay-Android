@@ -2,11 +2,10 @@ package com.adamyt.essay.essay;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -116,6 +115,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
+                Toast.makeText(this, this.getFilesDir().toString(), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_register:
                 System.out.println("nav_register");
@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity
 //                break;
             case R.id.nav_setting:
                 System.out.println("nav_setting");
+                Toast.makeText(this, Environment.getExternalStorageDirectory().toString(), Toast.LENGTH_SHORT).show();
                 break;
 //            case R.id.nav_about:
 //                System.out.println("nav_about");
@@ -146,7 +147,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showAuthorizeDialog(){
         View view = View.inflate(this, R.layout.authorize_input, null);
-        final EditText editText = (EditText) view.findViewById(R.id.authorize_password);
+        final EditText editText = view.findViewById(R.id.authorize_password);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Authorize")//设置对话框的标题
                 .setView(view)
@@ -215,7 +216,6 @@ public class MainActivity extends AppCompatActivity
             }
             EssayBean item = getItem(position);
             holder.lv_title.setText(item.title);
-//            System.out.println(Locale.getDefault());
             holder.lv_date.setText((new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())).format(item.date));
             holder.lv_icon.setImageDrawable(item.icon);
             return convertView;
