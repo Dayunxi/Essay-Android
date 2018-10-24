@@ -10,8 +10,14 @@ import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.adamyt.essay.essay.R;
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -59,15 +65,113 @@ public class EssayUtils {
         return true;
     }
 
-//    public static void savePlaintext(Context context, String username, String content, String title){
-//        if(needRequestWrite(context)) return;
-//        if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-//        String homePath = essayUserDir + username + "/";
-//        String unixTime = String.valueOf(System.currentTimeMillis());
-//        String filePath = homePath + unixTime + ".md";
-//        File file = new File(filePath);
-//        if(!file.exists()){
-//
-//        }
-//    }
+    private static boolean writeBytesTo(String filePath, byte[] byteStream){
+        File file = new File(filePath);
+        try {
+            if(!file.createNewFile()) return false;
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+
+        try {
+            FileOutputStream ostream = new FileOutputStream(file);
+            ostream.write(byteStream);
+            ostream.close();
+        }
+        catch (IOException e){
+            file.delete();
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean savePlaintext(Context context, String username, String content, String title){
+        if(needRequestWrite(context)) return false;
+        if(title == null) title = context.getResources().getString(R.string.essay_untitled);
+        String homePath = essayUserDir + username + "/public/text/";
+        String unixTime = String.valueOf(System.currentTimeMillis());
+        String filePath = homePath + unixTime + ".md";
+
+        return writeBytesTo(filePath, content.getBytes());
+    }
+    // TODO: AES & JSON & MD5
+    public static boolean saveCiphertext(Context context, String username, String content, String title){
+        if(needRequestWrite(context)) return false;
+        if(title == null) title = context.getResources().getString(R.string.essay_untitled);
+        String homePath = essayUserDir + username + "/private/text/";
+        String unixTime = String.valueOf(System.currentTimeMillis());
+        String filePath = homePath + unixTime + ".md";
+
+        // encryption
+
+        return writeBytesTo(filePath, content.getBytes());
+    }
+
+    public static void getAllEssay(){
+
+        String jsonRaw = "[\n" +
+                "{\"username\": \"Adam\",\n" +
+                "\"title\": \"Untitled\",\n" +
+                "\"createTime\": 0,\n" +
+                "\"url\": \"/user/Adam/public/text/0.md\",\n" +
+                "\"isPrivate\": false,\n" +
+                "\"lastModifyTime\": 0,\n" +
+                "\"essayType\": \"text\"\n" +
+                "},\n" +
+                "{\"username\": \"Adam\",\n" +
+                "\"title\": \"Untitled\",\n" +
+                "\"createTime\": 2,\n" +
+                "\"url\": \"/user/Adam/private/text/2.md\",\n" +
+                "\"isPrivate\": true,\n" +
+                "\"lastModifyTime\": 3,\n" +
+                "\"essayType\": \"text\",\n" +
+                "\"cipherKey\": \"sfas2354fdg76576gfr6767fdyt4654gh\"\n" +
+                "}\n" +
+                "]";
+        String jsonUser = "[{\"username\": \"Adam\",\n" +
+                "\"password\": \"45fdg2345dfgs234\",\n" +
+                "\"config\":{\n" +
+                "\"ttt\": \"23333\"\n" +
+                "}\n" +
+                "},\n" +
+                "{\"username\": \"Dayunxi\",\n" +
+                "\"password\": \"45f324sdsdfgs211\",\n" +
+                "\"config\":{}\n" +
+                "}]";
+        Gson gson = new Gson();
+        try {
+//            EssayInfo[] infos = gson.fromJson(jsonRaw, EssayInfo[].class);
+            UserInfo[] users = gson.fromJson(jsonUser, UserInfo[].class);
+
+            for(UserInfo item : users){
+                System.out.println(item.username);
+                System.out.println(item.password);
+                System.out.println(item.config.toString());
+            }
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    // /user/***/essayList.json
+    private class EssayInfo{
+        String username, title, url, essayType, cipherKey;
+        Long createTime, lastModifyTime;
+        boolean isPrivate;
+    }
+
+    // /users.json
+    private class Config{
+
+    }
+    private class UserInfo{
+        String username, password;
+        Config config;
+    }
 }

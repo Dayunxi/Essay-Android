@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
-                Toast.makeText(this, this.getFilesDir().toString(), Toast.LENGTH_SHORT).show();
+                EssayUtils.getAllEssay();
                 break;
             case R.id.nav_register:
                 System.out.println("nav_register");
