@@ -24,9 +24,11 @@
     <string name="editor_toolbar_done">Done</string>
     <string name="editor_toolbar_modify">Modify</string>
     <string name="editor_placeholder">Write down your thought</string>
+
+    <!--String related to confirm dialog-->
     <string name="confirm_save_draft">Do you want to save as a draft?</string>
-    <string name="confirm_yes">Yes</string>
-    <string name="confirm_no">No</string>
+    <string name="confirm_yes">Save</string>
+    <string name="confirm_no">Don\'t Save</string>
     <string name="confirm_cancel">Cancel</string>
 
     <!--String related to essay list in main activity-->

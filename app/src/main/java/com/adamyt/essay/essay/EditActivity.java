@@ -1,5 +1,6 @@
 package com.adamyt.essay.essay;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -81,6 +82,7 @@ public class EditActivity extends AppCompatActivity {
                 String currentText = editText.getText().toString();
                 if(isNew&&!currentText.equals("") || !isNew&&!currentText.equals(originText)){
                     draftConfirm();
+//                    draftConfirm();
                 }
                 else{
                     if(!isNew){
@@ -126,12 +128,63 @@ public class EditActivity extends AppCompatActivity {
         // String title = "";
     }
 
-    private void draftConfirm(){
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setMessage(R.string.confirm_save_draft);
-        dialog.setNegativeButton(R.string.confirm_no, new DialogInterface.OnClickListener(){
+//    private void draftAlertDialog(){
+//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//        dialog.setMessage(R.string.confirm_save_draft);
+//        dialog.setNegativeButton(R.string.confirm_no, new DialogInterface.OnClickListener(){
+//            @Override
+//            public void onClick(DialogInterface dialog, int which){
+//                dialog.dismiss();
+//                if(!isNew){
+//                    editText.setText(originText);
+//                    switchToReview();
+//                }
+//                else finish();
+//            }
+//        });
+//        dialog.setNeutralButton(R.string.confirm_cancel, new DialogInterface.OnClickListener(){
+//            @Override
+//            public void onClick(DialogInterface dialog, int which){
+//                dialog.dismiss();
+//            }
+//        });
+//        dialog.setPositiveButton(R.string.confirm_yes, new DialogInterface.OnClickListener(){
+//            @Override
+//            public void onClick(DialogInterface dialog, int which){
+//                //
+//
+//                dialog.dismiss();
+//                if(!isNew){
+//                    editText.setText(originText);
+//                    switchToReview();
+//                    Toast.makeText(EditActivity.this, "switch to review mode", Toast.LENGTH_SHORT).show();
+//                }
+//                else finish();
+//            }
+//        });
+//        dialog.show();
+//    }
+
+    private void draftConfirm() {
+        final Dialog dialog = new Dialog(this, R.style.NormalDialogStyle);
+        View view = View.inflate(this, R.layout.dialog_confirm, null);
+        TextView cancel = view.findViewById(R.id.confirm_no);
+        TextView confirm = view.findViewById(R.id.confirm_yes);
+        dialog.setContentView(view);
+        //点击对话框外部消失
+        dialog.setCanceledOnTouchOutside(true);
+//        //设置对话框的大小
+//        view.setMinimumHeight((int) (ScreenSizeUtils.getInstance(this).getScreenHeight() * 0.23f));
+//        Window dialogWindow = dialog.getWindow();
+//        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+//        lp.width = (int) (ScreenSizeUtils.getInstance(this).getScreenWidth() * 0.75f);
+//        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//        lp.gravity = Gravity.CENTER;
+//        dialogWindow.setAttributes(lp);
+        cancel.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which){
+            public void onClick(View v) {
+//                Toast.makeText(EditActivity.this, "No", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
                 if(!isNew){
                     editText.setText(originText);
@@ -140,17 +193,11 @@ public class EditActivity extends AppCompatActivity {
                 else finish();
             }
         });
-        dialog.setNeutralButton(R.string.confirm_cancel, new DialogInterface.OnClickListener(){
+        confirm.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which){
-                dialog.dismiss();
-            }
-        });
-        dialog.setPositiveButton(R.string.confirm_yes, new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which){
-                //
-
+            public void onClick(View v) {
+//                Toast.makeText(EditActivity.this, "Yes", Toast.LENGTH_SHORT).show();
+                saveAsDraft();
                 dialog.dismiss();
                 if(!isNew){
                     editText.setText(originText);
