@@ -15,6 +15,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -66,9 +67,11 @@ public class EssayUtils {
     }
 
     private static boolean writeBytesTo(String filePath, byte[] byteStream){
-        File file = new File(filePath);
+        File file = new File(essayRootDir+filePath);
+        File dir = file.getParentFile();
         try {
-            if(!file.createNewFile()) return false;
+            dir.mkdirs();
+            if(!file.createNewFile()) System.out.println("This file has already existed, replace it.");
         }
         catch (IOException e){
             e.printStackTrace();
@@ -81,11 +84,26 @@ public class EssayUtils {
             ostream.close();
         }
         catch (IOException e){
-            file.delete();
+//            file.delete();        // dangerous for user.json
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    private static byte[] readBytesFrom(String filePath){
+        try {
+            File file = new File(essayRootDir+filePath);
+            byte[] byteStream = new byte[(int)file.length()];
+            FileInputStream istream = new FileInputStream(file);
+            istream.read(byteStream);
+            istream.close();
+            return byteStream;
+        }
+        catch (IOException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static boolean savePlaintext(Context context, String username, String content, String title){
@@ -106,61 +124,54 @@ public class EssayUtils {
         String filePath = homePath + unixTime + ".md";
 
         // encryption
-
-        return writeBytesTo(filePath, content.getBytes());
+        writeBytesTo(filePath, content.getBytes());
+        addItemToEssayJson(filePath, username, title, "text", null);
+        return false;
     }
 
-    public static void getAllEssay(){
 
-        String jsonRaw = "[\n" +
-                "{\"username\": \"Adam\",\n" +
-                "\"title\": \"Untitled\",\n" +
-                "\"createTime\": 0,\n" +
-                "\"url\": \"/user/Adam/public/text/0.md\",\n" +
-                "\"isPrivate\": false,\n" +
-                "\"lastModifyTime\": 0,\n" +
-                "\"essayType\": \"text\"\n" +
-                "},\n" +
-                "{\"username\": \"Adam\",\n" +
-                "\"title\": \"Untitled\",\n" +
-                "\"createTime\": 2,\n" +
-                "\"url\": \"/user/Adam/private/text/2.md\",\n" +
-                "\"isPrivate\": true,\n" +
-                "\"lastModifyTime\": 3,\n" +
-                "\"essayType\": \"text\",\n" +
-                "\"cipherKey\": \"sfas2354fdg76576gfr6767fdyt4654gh\"\n" +
-                "}\n" +
-                "]";
-        String jsonUser = "[{\"username\": \"Adam\",\n" +
-                "\"password\": \"45fdg2345dfgs234\",\n" +
-                "\"config\":{\n" +
-                "\"ttt\": \"23333\"\n" +
-                "}\n" +
-                "},\n" +
-                "{\"username\": \"Dayunxi\",\n" +
-                "\"password\": \"45f324sdsdfgs211\",\n" +
-                "\"config\":{}\n" +
-                "}]";
-        Gson gson = new Gson();
+    public void addItemToUserJson(){
+
+    }
+    private static boolean addItemToEssayJson(String filePath, String username, String title, String type, String cipherKey){
+        EssayInfo essay = new EssayInfo();
+        essay.url = filePath;
+        essay.username = username;
+        essay.title = title;
+        essay.essayType = type;
+        essay.isPrivate = cipherKey!=null;
+        essay.cipherKey = cipherKey;
+        essay.createTime = System.currentTimeMillis();
         try {
-//            EssayInfo[] infos = gson.fromJson(jsonRaw, EssayInfo[].class);
-            UserInfo[] users = gson.fromJson(jsonUser, UserInfo[].class);
+            Gson gson = new Gson();
+            String jsonUser = null;
+            byte[] byteStream = readBytesFrom(filePath);
 
-            for(UserInfo item : users){
-                System.out.println(item.username);
-                System.out.println(item.password);
-                System.out.println(item.config.toString());
-            }
+            if(byteStream!=null) jsonUser = new String(byteStream);
+            EssayInfo[] essays = gson.fromJson(jsonUser, EssayInfo[].class);
+            int length = essays==null? 1 : essays.length+1;
+            EssayInfo[] newEssays = new EssayInfo[length];
+
+            // Newest item in the top of json file
+            newEssays[0] = essay;
+            if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
+
+            String newJson = gson.toJson(newEssays);
+            return writeBytesTo(filePath, newJson.getBytes());
         }
         catch (JsonSyntaxException e){
             e.printStackTrace();
+            return false;
         }
+    }
+
+    public static void getAllEssay(){
 
 
     }
 
     // /user/***/essayList.json
-    private class EssayInfo{
+    private static class EssayInfo{
         String username, title, url, essayType, cipherKey;
         Long createTime, lastModifyTime;
         boolean isPrivate;
