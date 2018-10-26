@@ -26,9 +26,16 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class EssayUtils {
     public final static int REQUEST_WRITE_SOTRAGE = 0;
-    public final static String essayRootDir = Environment.getExternalStorageDirectory().toString()+"/com.adamyt.essay/";
-    public final static String essayConfigDir = essayRootDir+"config/";
-    public final static String essayUserDir = essayRootDir+"user/";
+    public final static String EssayRootDir = Environment.getExternalStorageDirectory().toString()+"/com.adamyt.essay/";
+    public final static String EssayConfigDir = EssayRootDir+"config/";
+    public final static String EssayUserDir = EssayRootDir+"user/";
+    public final static String EssayUserJsonPath = EssayRootDir+"user.json";
+
+    public final static String UserEssaysJsonName = "essays.json";
+    
+    public static String CurrentUsername;
+    public static String CurrentUserHome;
+    public static boolean hasLoggedIn = false;
 
     public static ArrayList<EssayBean> getAllPublicEssay(Context context){
         ArrayList<EssayBean> essayList = new ArrayList<>();
@@ -67,7 +74,7 @@ public class EssayUtils {
     }
 
     private static boolean writeBytesTo(String filePath, byte[] byteStream){
-        File file = new File(essayRootDir+filePath);
+        File file = new File(EssayRootDir+filePath);
         File dir = file.getParentFile();
         try {
             dir.mkdirs();
@@ -93,7 +100,8 @@ public class EssayUtils {
 
     private static byte[] readBytesFrom(String filePath){
         try {
-            File file = new File(essayRootDir+filePath);
+            File file = new File(EssayRootDir+filePath);
+            if(!file.exists() || file.length()==0) return null;
             byte[] byteStream = new byte[(int)file.length()];
             FileInputStream istream = new FileInputStream(file);
             istream.read(byteStream);
@@ -107,9 +115,10 @@ public class EssayUtils {
     }
 
     public static boolean savePlaintext(Context context, String username, String content, String title){
+        if(!hasLoggedIn) return false;
         if(needRequestWrite(context)) return false;
         if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-        String homePath = essayUserDir + username + "/public/text/";
+        String homePath = EssayUserDir + username + "/public/text/";
         String unixTime = String.valueOf(System.currentTimeMillis());
         String filePath = homePath + unixTime + ".md";
 
@@ -117,47 +126,90 @@ public class EssayUtils {
     }
     // TODO: AES & JSON & MD5
     public static boolean saveCiphertext(Context context, String username, String content, String title){
+        if(!hasLoggedIn) return false;
         if(needRequestWrite(context)) return false;
         if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-        String homePath = essayUserDir + username + "/private/text/";
+        String homePath = EssayUserDir + username + "/private/text/";
         String unixTime = String.valueOf(System.currentTimeMillis());
         String filePath = homePath + unixTime + ".md";
 
+        byte[] plainText = content.getBytes();
         // encryption
-        writeBytesTo(filePath, content.getBytes());
+        byte[] cipherText = null;
+
+        writeBytesTo(filePath, cipherText);
         addItemToEssayJson(filePath, username, title, "text", null);
         return false;
     }
 
-
-    public void addItemToUserJson(){
-
-    }
-    private static boolean addItemToEssayJson(String filePath, String username, String title, String type, String cipherKey){
-        EssayInfo essay = new EssayInfo();
-        essay.url = filePath;
-        essay.username = username;
-        essay.title = title;
-        essay.essayType = type;
-        essay.isPrivate = cipherKey!=null;
-        essay.cipherKey = cipherKey;
-        essay.createTime = System.currentTimeMillis();
+    // TODO: Call it in Activity.onCreate()
+    public static String getUserHome(String username){
         try {
             Gson gson = new Gson();
-            String jsonUser = null;
-            byte[] byteStream = readBytesFrom(filePath);
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(EssayUserJsonPath);
 
-            if(byteStream!=null) jsonUser = new String(byteStream);
-            EssayInfo[] essays = gson.fromJson(jsonUser, EssayInfo[].class);
+            if(byteStream!=null) jsonString = new String(byteStream);
+            UserInfo[] users = gson.fromJson(jsonString, UserInfo[].class);
+
+            if(users!=null){
+                for(UserInfo user : users){
+                    if(user.username.equals(username)) return user.home;
+                }
+            }
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //TODO: create a new user
+    private static boolean addItemToUserJson(String username, String password){
+        UserInfo user = new UserInfo(username, password);
+        try {
+            Gson gson = new Gson();
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(EssayUserJsonPath);
+
+            if(byteStream!=null) jsonString = new String(byteStream);
+            UserInfo[] users = gson.fromJson(jsonString, UserInfo[].class);
+            int length = users==null? 1 : users.length+1;
+            UserInfo[] newUsers = new UserInfo[length];
+
+            // Latest item in the top of json file
+            newUsers[0] = user;
+            if(users!=null) System.arraycopy(users, 0, newUsers, 1, length-1);
+
+            String newJson = gson.toJson(newUsers);
+            return writeBytesTo(EssayUserJsonPath, newJson.getBytes());
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // TODO:
+    private static boolean addItemToEssayJson(String url, String username, String title, String type, String cipherKey){
+        if(!hasLoggedIn) return false;
+        String FilePath = CurrentUserHome + UserEssaysJsonName;
+        EssayInfo essay = new EssayInfo(url, username, title, type, cipherKey);
+        try {
+            Gson gson = new Gson();
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(FilePath);
+
+            if(byteStream!=null) jsonString = new String(byteStream);
+            EssayInfo[] essays = gson.fromJson(jsonString, EssayInfo[].class);
             int length = essays==null? 1 : essays.length+1;
             EssayInfo[] newEssays = new EssayInfo[length];
 
-            // Newest item in the top of json file
+            // Latest item in the top of json file
             newEssays[0] = essay;
             if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
 
             String newJson = gson.toJson(newEssays);
-            return writeBytesTo(filePath, newJson.getBytes());
+            return writeBytesTo(FilePath, newJson.getBytes());
         }
         catch (JsonSyntaxException e){
             e.printStackTrace();
@@ -172,17 +224,32 @@ public class EssayUtils {
 
     // /user/***/essayList.json
     private static class EssayInfo{
-        String username, title, url, essayType, cipherKey;
+        String username, title, url, type, cipherKey;
         Long createTime, lastModifyTime;
         boolean isPrivate;
+
+        EssayInfo(String url, String username, String title, String type, String cipherKey){
+            this.url = url;
+            this.username = username;
+            this.title = title;
+            this.type = type;
+            this.isPrivate = cipherKey!=null;
+            this.cipherKey = cipherKey;
+            this.createTime = System.currentTimeMillis();
+        }
     }
 
     // /users.json
     private class Config{
 
     }
-    private class UserInfo{
-        String username, password;
+    private static class UserInfo{
+        String username, password, home;
         Config config;
+
+        UserInfo(String username, String password){
+            this.username = username;
+            this.password = password;
+        }
     }
 }
