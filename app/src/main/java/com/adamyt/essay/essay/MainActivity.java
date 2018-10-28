@@ -2,6 +2,7 @@ package com.adamyt.essay.essay;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -35,6 +36,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private ArrayList<EssayBean> essayList;
+    private EssayAdapter essayAdapter;
 
     public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
     public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
@@ -67,7 +69,30 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        loadEssay();
+        View navHeaderMain = navigationView.getHeaderView(0);
+        ImageView avatar = navHeaderMain.findViewById(R.id.navAvatar);
+        if(avatar!=null) avatar.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        refresh();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        System.out.println("onStart...");
+        refresh();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        System.out.println("onResume...");
     }
 
     @Override
@@ -115,7 +140,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
-                EssayUtils.getAllEssay();
+                EssayUtils.getAllEssay(this);
                 break;
             case R.id.nav_register:
                 System.out.println("nav_register");
@@ -137,6 +162,7 @@ public class MainActivity extends AppCompatActivity
 //                break;
             case R.id.nav_logout:
                 System.out.println("nav_logout");
+                logout();
                 break;
         }
 
@@ -168,27 +194,83 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
     }
 
-    private void loadEssay() {
-        essayList = EssayUtils.getAllPublicEssay(this);
-        ListView lv = findViewById(R.id.essay_list);
+    // load essay and user or logout
+    private void refresh(){
+        SharedPreferences sp = getSharedPreferences("data", 0);
+        EssayUtils.CurrentUsername = sp.getString("currentUser", null);
+        if(EssayUtils.CurrentUsername!=null){
+            EssayUtils.hasLoggedIn = true;
+            EssayUtils.isAuthorized = false; // for test
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View navHeaderMain = navigationView.getHeaderView(0);
+            ImageView avatar = navHeaderMain.findViewById(R.id.navAvatar);
+//            avatar.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_black));
+            TextView usernameText = navHeaderMain.findViewById(R.id.navUsername);
+            usernameText.setText(EssayUtils.CurrentUsername);
+            loadEssay();
+        }
+        else{
+            EssayUtils.hasLoggedIn = false;
+            EssayUtils.isAuthorized = false;
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View navHeaderMain = navigationView.getHeaderView(0);
+            ImageView avatar = navHeaderMain.findViewById(R.id.navAvatar);
+            TextView usernameText = navHeaderMain.findViewById(R.id.navUsername);
+            usernameText.setText(R.string.nav_header_title);
+            TextView promptEmpty = findViewById(R.id.list_empty_text);
+            promptEmpty.setVisibility(View.VISIBLE);
+//            promptEmpty.setText("Please login");
+//            ListView lv = findViewById(R.id.essay_list);
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent();
-                System.out.println(position);
+            if(essayList!=null){
+                essayList.clear();
+                essayAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    private void logout(){
+        SharedPreferences sp = getSharedPreferences("data", 0);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString("currentUser", null);
+        editor.apply();
+        refresh();
+    }
+
+    private void loadEssay() {
+        TextView promptEmpty = findViewById(R.id.list_empty_text);
+        if(EssayUtils.hasLoggedIn){
+            if(EssayUtils.isAuthorized) essayList = EssayUtils.getAllEssay(this);
+            else essayList = EssayUtils.getAllPublicEssay(this);
+
+            if(essayList==null) promptEmpty.setVisibility(View.VISIBLE);
+            else promptEmpty.setVisibility(View.GONE);
+
+            ListView lv = findViewById(R.id.essay_list);
+
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Intent intent = new Intent();
+                    System.out.println(position);
 //                intent.setAction(Intent.ACTION_VIEW);
 //                intent.setData(Uri.parse(essayList.get(position).essayUrl));
 //                startActivity(intent);
-            }
-        });
-        lv.setAdapter(new EssayAdapter());
+                }
+            });
+            essayAdapter = new EssayAdapter();
+            lv.setAdapter(essayAdapter);
+        }
+        else{
+            promptEmpty.setVisibility(View.VISIBLE);
+        }
+
     }
 
     private class EssayAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            return essayList.size();
+            return essayList==null? 0 : essayList.size();
         }
 
         @Override

@@ -108,12 +108,12 @@ public class EditActivity extends AppCompatActivity {
                 if(EssayUtils.needRequestWrite(EditActivity.this)) return;
                 //save to local as cipher text or plain text
 
-                File dir = new File(EssayUtils.essayUserDir);
+                File dir = new File(EssayUtils.RelativeUserDir);
                 if(!dir.exists()){
                     if(!dir.mkdir())
                         Toast.makeText(EditActivity.this, "Can't mkdir", Toast.LENGTH_SHORT).show();
                     else{   //TODO: ./user/username/essay.json
-                        Toast.makeText(EditActivity.this, EssayUtils.essayUserDir, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditActivity.this, EssayUtils.RelativeUserDir, Toast.LENGTH_SHORT).show();
 
                     }
                 }

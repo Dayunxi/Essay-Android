@@ -10,6 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.adamyt.essay.essay.R;
+import com.adamyt.essay.struct.EssayInfo;
+import com.adamyt.essay.struct.UserInfo;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
@@ -27,15 +29,16 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class EssayUtils {
     public final static int REQUEST_WRITE_SOTRAGE = 0;
     public final static String EssayRootDir = Environment.getExternalStorageDirectory().toString()+"/com.adamyt.essay/";
-    public final static String EssayConfigDir = EssayRootDir+"config/";
-    public final static String EssayUserDir = EssayRootDir+"user/";
-    public final static String EssayUserJsonPath = EssayRootDir+"user.json";
+    public final static String RelativeUserDir = "/user/";
+    public final static String RelativeUserJsonPath = "/user.json";
 
     public final static String UserEssaysJsonName = "essays.json";
     
     public static String CurrentUsername;
     public static String CurrentUserHome;
+    public static String CurrentUserPassword;
     public static boolean hasLoggedIn = false;
+    public static boolean isAuthorized = false;
 
     public static ArrayList<EssayBean> getAllPublicEssay(Context context){
         ArrayList<EssayBean> essayList = new ArrayList<>();
@@ -57,6 +60,29 @@ public class EssayUtils {
 
         return null;
     }
+
+    public static UserInfo[] getUserList(Context context){
+        if(needRequestWrite(context)) return null;
+        try {
+            Gson gson = new Gson();
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(RelativeUserJsonPath);
+
+            if(byteStream!=null) jsonString = new String(byteStream);
+
+            return gson.fromJson(jsonString, UserInfo[].class);
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean addUser(Context context, String username, String password){
+        if(needRequestWrite(context)) return false;
+        return addItemToUserJson(username, password);
+    }
+
 
     public static boolean needRequestWrite(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -118,7 +144,7 @@ public class EssayUtils {
         if(!hasLoggedIn) return false;
         if(needRequestWrite(context)) return false;
         if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-        String homePath = EssayUserDir + username + "/public/text/";
+        String homePath = RelativeUserDir + username + "/public/text/";
         String unixTime = String.valueOf(System.currentTimeMillis());
         String filePath = homePath + unixTime + ".md";
 
@@ -129,7 +155,7 @@ public class EssayUtils {
         if(!hasLoggedIn) return false;
         if(needRequestWrite(context)) return false;
         if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-        String homePath = EssayUserDir + username + "/private/text/";
+        String homePath = RelativeUserDir + username + "/private/text/";
         String unixTime = String.valueOf(System.currentTimeMillis());
         String filePath = homePath + unixTime + ".md";
 
@@ -147,7 +173,7 @@ public class EssayUtils {
         try {
             Gson gson = new Gson();
             String jsonString = null;
-            byte[] byteStream = readBytesFrom(EssayUserJsonPath);
+            byte[] byteStream = readBytesFrom(RelativeUserJsonPath);
 
             if(byteStream!=null) jsonString = new String(byteStream);
             UserInfo[] users = gson.fromJson(jsonString, UserInfo[].class);
@@ -170,7 +196,7 @@ public class EssayUtils {
         try {
             Gson gson = new Gson();
             String jsonString = null;
-            byte[] byteStream = readBytesFrom(EssayUserJsonPath);
+            byte[] byteStream = readBytesFrom(RelativeUserJsonPath);
 
             if(byteStream!=null) jsonString = new String(byteStream);
             UserInfo[] users = gson.fromJson(jsonString, UserInfo[].class);
@@ -182,7 +208,7 @@ public class EssayUtils {
             if(users!=null) System.arraycopy(users, 0, newUsers, 1, length-1);
 
             String newJson = gson.toJson(newUsers);
-            return writeBytesTo(EssayUserJsonPath, newJson.getBytes());
+            return writeBytesTo(RelativeUserJsonPath, newJson.getBytes());
         }
         catch (JsonSyntaxException e){
             e.printStackTrace();
@@ -217,39 +243,10 @@ public class EssayUtils {
         }
     }
 
-    public static void getAllEssay(){
-
-
+    public static ArrayList<EssayBean> getAllEssay(Context context){
+        if(!hasLoggedIn || !isAuthorized) return null;
+        return null;
     }
 
-    // /user/***/essayList.json
-    private static class EssayInfo{
-        String username, title, url, type, cipherKey;
-        Long createTime, lastModifyTime;
-        boolean isPrivate;
 
-        EssayInfo(String url, String username, String title, String type, String cipherKey){
-            this.url = url;
-            this.username = username;
-            this.title = title;
-            this.type = type;
-            this.isPrivate = cipherKey!=null;
-            this.cipherKey = cipherKey;
-            this.createTime = System.currentTimeMillis();
-        }
-    }
-
-    // /users.json
-    private class Config{
-
-    }
-    private static class UserInfo{
-        String username, password, home;
-        Config config;
-
-        UserInfo(String username, String password){
-            this.username = username;
-            this.password = password;
-        }
-    }
 }
