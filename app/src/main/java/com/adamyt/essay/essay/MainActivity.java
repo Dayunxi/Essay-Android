@@ -251,8 +251,10 @@ public class MainActivity extends AppCompatActivity
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Intent intent = new Intent();
-                    System.out.println(position);
+                Intent intent = new Intent();
+                intent.putExtra(IS_NEW, true);
+                intent.putExtra(ESSAY_URL, essayList.get(position).essayUrl);
+                System.out.println(position);
 //                intent.setAction(Intent.ACTION_VIEW);
 //                intent.setData(Uri.parse(essayList.get(position).essayUrl));
 //                startActivity(intent);

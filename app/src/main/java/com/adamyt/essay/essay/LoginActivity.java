@@ -222,7 +222,8 @@ public class LoginActivity extends AppCompatActivity {
                 for (UserInfo user : AllUsers) {
                     if (user.username.equals(mUsername)) {
                         // Account exists, return true if the password matches.
-                        if(user.password.equals(mPassword)) return SUCCESS;
+                        String mdPassword = EssayUtils.getMD5(mPassword);
+                        if(user.password.equals(mdPassword)) return SUCCESS;
                         else return ERR_INCORRECT_PASSWD;
                     }
                 }

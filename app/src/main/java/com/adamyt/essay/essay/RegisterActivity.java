@@ -223,7 +223,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             // TODO: register the new account here.
 //            UserInfo newUser = new UserInfo(mUsername, mPassword);
-            EssayUtils.addUser(RegisterActivity.this, mUsername, mPassword);
+
             return SUCCESS;
         }
 
@@ -233,11 +233,17 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(false);
 
             if (result.equals(SUCCESS)) {
-                EssayUtils.hasLoggedIn = true;
-                EssayUtils.isAuthorized = true;
-                EssayUtils.CurrentUsername = mUsername;
-                EssayUtils.CurrentUserPassword = mPassword;
-                finish();
+                String mdPassword = EssayUtils.getMD5(mPassword);
+                UserInfo user = new UserInfo(mUsername, mdPassword, EssayUtils.AbsoluteUserDir);
+                if(EssayUtils.addUser(RegisterActivity.this, user)){
+                    EssayUtils.hasLoggedIn = true;
+                    EssayUtils.isAuthorized = true;
+                    EssayUtils.CurrentUsername = mUsername;
+                    EssayUtils.CurrentUserPassword = mPassword;
+                    EssayUtils.CurrentUserHome = user.home;
+                    finish();
+                }
+                else Toast.makeText(RegisterActivity.this, "Failed", Toast.LENGTH_SHORT).show();
             } else if(result.equals(ERR_EXIST_USER)) {
                 mUsernameView.setError(getString(R.string.error_exist_username));
                 mUsernameView.requestFocus();

@@ -107,6 +107,8 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View view){
                 if(EssayUtils.needRequestWrite(EditActivity.this)) return;
                 //save to local as cipher text or plain text
+                String content = editText.getText().toString();
+                EssayUtils.savePlaintext(EditActivity.this, EssayUtils.CurrentUsername, content, "");
 
                 File dir = new File(EssayUtils.RelativeUserDir);
                 if(!dir.exists()){
