@@ -23,7 +23,9 @@
     <string name="editor_toolbar_save">Save</string>
     <string name="editor_toolbar_done">Done</string>
     <string name="editor_toolbar_modify">Modify</string>
-    <string name="editor_placeholder">Write down your thought</string>
+    <string name="editor_title">Title</string>
+    <string name="editor_content_placeholder">Write down your thought</string>
+    <string name="editor_title_placeholder">Enter the title (Optional)</string>
 
     <!--String related to confirm dialog-->
     <string name="confirm_save_draft">Do you want to save as a draft?</string>

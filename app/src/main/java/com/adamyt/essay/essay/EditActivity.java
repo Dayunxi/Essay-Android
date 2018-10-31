@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
@@ -23,7 +24,8 @@ import com.google.gson.Gson;
 public class EditActivity extends AppCompatActivity {
 
     private Toolbar reviewBar, modifyBar;
-    private EditText editText;
+    private EditText editTextContent;
+    private EditText editTextTitle;
     private String originText = null;
 
     // review or create a new essay
@@ -45,7 +47,8 @@ public class EditActivity extends AppCompatActivity {
 
         reviewBar = findViewById(R.id.review_toolbar);
         modifyBar = findViewById(R.id.modify_toolbar);
-        editText = findViewById(R.id.editEssay);
+        editTextContent = findViewById(R.id.editEssay);
+        editTextTitle = findViewById(R.id.editTitle);
         textViewBack = findViewById(R.id.editor_activity_back);
         textViewModify = findViewById(R.id.editor_activity_modify);
         textViewCancel = findViewById(R.id.editor_activity_cancel);
@@ -60,7 +63,7 @@ public class EditActivity extends AppCompatActivity {
             switchToModify();
         }
         else{
-//            editText.setText(intent.getStringExtra(MainActivity.ESSAY_URL));
+//            editTextContent.setText(intent.getStringExtra(MainActivity.ESSAY_URL));
             switchToReview();
         }
 
@@ -85,7 +88,7 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // if not new and not modify?
-                String currentText = editText.getText().toString();
+                String currentText = editTextContent.getText().toString();
                 if(isNew&&!currentText.equals("") || !isNew&&!currentText.equals(originText)){
                     draftConfirm();
                 }
@@ -102,21 +105,22 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view){
                 //save to local as cipher text or plain text
-                String content = editText.getText().toString();
+                String content = editTextContent.getText().toString();
+                String title = editTextTitle.getText().toString();
                 EssayInfo newEssay;
                 if(isNew){
                     newEssay = new EssayInfo();
                     newEssay.uid = EssayUtils.CurrentUser.uid;
                     newEssay.type = "text";
                     newEssay.createTime = System.currentTimeMillis();
-//                    newEssay.title = title;
+                    newEssay.title = title;
                     newEssay.isPrivate = false;
                 }
                 else{
                     newEssay = editEssay;
                     newEssay.lastModifyTime = System.currentTimeMillis();
 //                    newEssay.isPrivate = isPrivate;
-//                    newEssay.title = title;
+                    newEssay.title = title;
                 }
 
 
@@ -125,6 +129,14 @@ public class EditActivity extends AppCompatActivity {
                 if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();
 
+            }
+        });
+
+        ScrollView scrollView = findViewById(R.id.edit_activity_scroll);
+        scrollView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                editTextContent.requestFocus();
             }
         });
     }
@@ -141,22 +153,22 @@ public class EditActivity extends AppCompatActivity {
     }
     
     private void switchToReview(){
-        editText.setFocusable(false);
-        editText.setFocusableInTouchMode(false);
-        editText.setCursorVisible(false);
-        editText.setEnabled(false);
-        editText.setTextColor(Color.BLACK);
+        editTextContent.setFocusable(false);
+        editTextContent.setFocusableInTouchMode(false);
+        editTextContent.setCursorVisible(false);
+        editTextContent.setEnabled(false);
+        editTextContent.setTextColor(Color.BLACK);
         reviewBar.setVisibility(View.VISIBLE);
         modifyBar.setVisibility(View.GONE);
     }
     private void switchToModify(){
-        editText.setFocusable(true);
-        editText.setFocusableInTouchMode(true);
-        editText.setCursorVisible(true);
-        editText.setEnabled(true);
+        editTextContent.setFocusable(true);
+        editTextContent.setFocusableInTouchMode(true);
+        editTextContent.setCursorVisible(true);
+        editTextContent.setEnabled(true);
         modifyBar.setVisibility(View.VISIBLE);
         reviewBar.setVisibility(View.GONE);
-        editText.requestFocus();
+        editTextContent.requestFocus();
     }
 
     private void saveAsDraft(){
@@ -190,7 +202,7 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dialog.dismiss();
                 if(!isNew){
-                    editText.setText(originText);
+                    editTextContent.setText(originText);
                     switchToReview();
                 }
                 else finish();
@@ -202,7 +214,7 @@ public class EditActivity extends AppCompatActivity {
                 saveAsDraft();
                 dialog.dismiss();
                 if(!isNew){
-                    editText.setText(originText);
+                    editTextContent.setText(originText);
                     switchToReview();
                     Toast.makeText(EditActivity.this, "switch to review mode", Toast.LENGTH_SHORT).show();
                 }
