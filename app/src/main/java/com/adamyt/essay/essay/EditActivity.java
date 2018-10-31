@@ -1,16 +1,11 @@
 package com.adamyt.essay.essay;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,14 +20,12 @@ import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.utils.EssayUtils;
 import com.google.gson.Gson;
 
-import java.io.File;
-
 public class EditActivity extends AppCompatActivity {
 
     private Toolbar reviewBar, modifyBar;
     private EditText editText;
-    private String originText;
-    
+    private String originText = null;
+
     // review or create a new essay
     private boolean isNew = false;
     private EssayInfo editEssay = null;
@@ -60,7 +53,6 @@ public class EditActivity extends AppCompatActivity {
 
         Intent intent  = getIntent();
         isNew = intent.getBooleanExtra(MainActivity.IS_NEW, false);
-//        originText = intent.getStringExtra(MainActivity.ESSAY_URL);
         String json = intent.getStringExtra(MainActivity.EDIT_ESSAY);
         if(json != null) editEssay = new Gson().fromJson(json, EssayInfo.class);
 
@@ -96,7 +88,6 @@ public class EditActivity extends AppCompatActivity {
                 String currentText = editText.getText().toString();
                 if(isNew&&!currentText.equals("") || !isNew&&!currentText.equals(originText)){
                     draftConfirm();
-//                    draftConfirm();
                 }
                 else{
                     if(!isNew){
@@ -110,11 +101,8 @@ public class EditActivity extends AppCompatActivity {
         textViewDone.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                if(EssayUtils.needRequestWrite(EditActivity.this)) return;
                 //save to local as cipher text or plain text
                 String content = editText.getText().toString();
-//                EssayUtils.savePlaintext(EditActivity.this, EssayUtils.CurrentUser.username, content, "");
-
                 EssayInfo newEssay;
                 if(isNew){
                     newEssay = new EssayInfo();
@@ -132,7 +120,7 @@ public class EditActivity extends AppCompatActivity {
                 }
 
 
-                boolean result = EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew);
+                boolean result = EssayUtils.saveUserEssay(EditActivity.this, content, newEssay, isNew);
 
                 if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();

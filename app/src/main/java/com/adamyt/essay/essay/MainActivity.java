@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity
     private EssayAdapter essayAdapter;
 
     public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
-//    public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
     public static final String EDIT_ESSAY = "com.adamyt.essay.EDIT_ESSAY";
 
     @Override
@@ -54,8 +53,6 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 intent.putExtra(IS_NEW, true);
                 startActivity(intent);
@@ -80,8 +77,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
-//        refresh();
     }
 
     @Override
@@ -262,11 +257,9 @@ public class MainActivity extends AppCompatActivity
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 intent.putExtra(IS_NEW, true);
-//                intent.putExtra(ESSAY_URL, essayList.get(position).url);
                 intent.putExtra(EDIT_ESSAY, new Gson().toJson(essayList.get(position)));
                 System.out.println(position);
-//                intent.setAction(Intent.ACTION_VIEW);
-//                intent.setData(Uri.parse(essayList.get(position).essayUrl));
+
 //                startActivity(intent);
                 }
             });

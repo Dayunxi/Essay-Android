@@ -5,16 +5,10 @@ public class UserInfo implements Cloneable {
     public Long uid;
     Config config;
 
-//    public UserInfo(String username, String password){
-//        this.username = username;
-//        this.password = password;
-//    }
-
     public UserInfo(String username, String password){
         this.username = username;
         this.password = password;
         this.uid = System.currentTimeMillis();
-//        this.home = userDir+"/"+uid.toString();
     }
 
     private class Config{

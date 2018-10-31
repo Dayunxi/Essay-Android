@@ -1,24 +1,11 @@
 package com.adamyt.essay.essay;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
 
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,14 +17,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.struct.UserInfo;
 import com.adamyt.essay.utils.EssayUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -244,8 +228,7 @@ public class LoginActivity extends AppCompatActivity {
             if (result.equals(SUCCESS)){
                 EssayUtils.hasLoggedIn = true;
                 EssayUtils.isAuthorized = false;    //test
-//                EssayUtils.CurrentUsername = mUsername;
-//                EssayUtils.CurrentUserPassword = mPassword;
+
                 SharedPreferences sp = getSharedPreferences("data", 0);
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("currentUser", mUsername);
