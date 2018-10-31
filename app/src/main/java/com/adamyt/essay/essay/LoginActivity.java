@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.struct.UserInfo;
 import com.adamyt.essay.utils.EssayUtils;
 
@@ -223,7 +224,12 @@ public class LoginActivity extends AppCompatActivity {
                     if (user.username.equals(mUsername)) {
                         // Account exists, return true if the password matches.
                         String mdPassword = EssayUtils.getMD5(mPassword);
-                        if(user.password.equals(mdPassword)) return SUCCESS;
+                        if(user.password.equals(mdPassword)){
+                            EssayUtils.CurrentUser = (UserInfo) user.clone();
+                            if(EssayUtils.CurrentUser != null) System.out.println("Login Success NOT NULL");
+                            else System.out.println("Login Success NULL");
+                            return SUCCESS;
+                        }
                         else return ERR_INCORRECT_PASSWD;
                     }
                 }
@@ -237,12 +243,13 @@ public class LoginActivity extends AppCompatActivity {
 //            showProgress(false);
             if (result.equals(SUCCESS)){
                 EssayUtils.hasLoggedIn = true;
-                EssayUtils.isAuthorized = true;
-                EssayUtils.CurrentUsername = mUsername;
-                EssayUtils.CurrentUserPassword = mPassword;
+                EssayUtils.isAuthorized = false;    //test
+//                EssayUtils.CurrentUsername = mUsername;
+//                EssayUtils.CurrentUserPassword = mPassword;
                 SharedPreferences sp = getSharedPreferences("data", 0);
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("currentUser", mUsername);
+                editor.putLong("currentUid", EssayUtils.CurrentUser.uid);
                 editor.apply();
                 finish();
             }

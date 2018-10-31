@@ -26,8 +26,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.adamyt.essay.utils.EssayBean;
+import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.utils.EssayUtils;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,11 +36,12 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private ArrayList<EssayBean> essayList;
+    private ArrayList<EssayInfo> essayList;
     private EssayAdapter essayAdapter;
 
     public static final String IS_NEW = "com.adamyt.essay.IS_NEW";
-    public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
+//    public static final String ESSAY_URL = "com.adamyt.essay.ESSAY_URL";
+    public static final String EDIT_ESSAY = "com.adamyt.essay.EDIT_ESSAY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +81,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        refresh();
+//        refresh();
     }
 
     @Override
     public void onStart(){
         super.onStart();
         System.out.println("onStart...");
+        login();
         refresh();
     }
 
@@ -196,22 +199,16 @@ public class MainActivity extends AppCompatActivity
 
     // load essay and user or logout
     private void refresh(){
-        SharedPreferences sp = getSharedPreferences("data", 0);
-        EssayUtils.CurrentUsername = sp.getString("currentUser", null);
-        if(EssayUtils.CurrentUsername!=null){
-            EssayUtils.hasLoggedIn = true;
-            EssayUtils.isAuthorized = false; // for test
+        if(EssayUtils.CurrentUser!=null){
             NavigationView navigationView = findViewById(R.id.nav_view);
             View navHeaderMain = navigationView.getHeaderView(0);
             ImageView avatar = navHeaderMain.findViewById(R.id.navAvatar);
 //            avatar.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_black));
             TextView usernameText = navHeaderMain.findViewById(R.id.navUsername);
-            usernameText.setText(EssayUtils.CurrentUsername);
+            usernameText.setText(EssayUtils.CurrentUser.username);
             loadEssay();
         }
         else{
-            EssayUtils.hasLoggedIn = false;
-            EssayUtils.isAuthorized = false;
             NavigationView navigationView = findViewById(R.id.nav_view);
             View navHeaderMain = navigationView.getHeaderView(0);
             ImageView avatar = navHeaderMain.findViewById(R.id.navAvatar);
@@ -229,11 +226,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void login(){
+        SharedPreferences sp = getSharedPreferences("data", 0);
+        Long uid = sp.getLong("currentUid", 0);
+        System.out.println("UID: " + uid);
+        if(uid != 0) EssayUtils.CurrentUser = EssayUtils.getUserInfo(this, uid);
+        EssayUtils.hasLoggedIn = EssayUtils.CurrentUser!=null;
+    }
+
     private void logout(){
         SharedPreferences sp = getSharedPreferences("data", 0);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("currentUser", null);
+        editor.putLong("currentUid", 0);
         editor.apply();
+        EssayUtils.CurrentUser = null;
+        EssayUtils.isAuthorized = false;
+        EssayUtils.hasLoggedIn = false;
         refresh();
     }
 
@@ -243,7 +252,7 @@ public class MainActivity extends AppCompatActivity
             if(EssayUtils.isAuthorized) essayList = EssayUtils.getAllEssay(this);
             else essayList = EssayUtils.getAllPublicEssay(this);
 
-            if(essayList==null) promptEmpty.setVisibility(View.VISIBLE);
+            if(essayList==null || essayList.size()==0) promptEmpty.setVisibility(View.VISIBLE);
             else promptEmpty.setVisibility(View.GONE);
 
             ListView lv = findViewById(R.id.essay_list);
@@ -251,9 +260,10 @@ public class MainActivity extends AppCompatActivity
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent();
+                Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 intent.putExtra(IS_NEW, true);
-                intent.putExtra(ESSAY_URL, essayList.get(position).essayUrl);
+//                intent.putExtra(ESSAY_URL, essayList.get(position).url);
+                intent.putExtra(EDIT_ESSAY, new Gson().toJson(essayList.get(position)));
                 System.out.println(position);
 //                intent.setAction(Intent.ACTION_VIEW);
 //                intent.setData(Uri.parse(essayList.get(position).essayUrl));
@@ -276,7 +286,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        public EssayBean getItem(int position) {
+        public EssayInfo getItem(int position) {
             return essayList.get(position);
         }
 
@@ -298,10 +308,11 @@ public class MainActivity extends AppCompatActivity
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            EssayBean item = getItem(position);
-            holder.lv_title.setText(item.title);
-            holder.lv_date.setText((new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())).format(item.date));
-            holder.lv_icon.setImageDrawable(item.icon);
+            EssayInfo item = getItem(position);
+            holder.lv_title.setText(item.title==null? "Untitled":item.title);
+            holder.lv_date.setText((new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())).format(item.createTime));
+            int iconLockUri = item.isPrivate? R.drawable.ic_lock_black : R.drawable.ic_lock_open_black;
+            holder.lv_icon.setImageDrawable(getResources().getDrawable(iconLockUri));
             return convertView;
         }
     }

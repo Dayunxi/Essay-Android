@@ -21,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
 
+import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.utils.EssayUtils;
+import com.google.gson.Gson;
 
 import java.io.File;
 
@@ -33,6 +35,7 @@ public class EditActivity extends AppCompatActivity {
     
     // review or create a new essay
     private boolean isNew = false;
+    private EssayInfo editEssay = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +60,15 @@ public class EditActivity extends AppCompatActivity {
 
         Intent intent  = getIntent();
         isNew = intent.getBooleanExtra(MainActivity.IS_NEW, false);
-        originText = intent.getStringExtra(MainActivity.ESSAY_URL);
+//        originText = intent.getStringExtra(MainActivity.ESSAY_URL);
+        String json = intent.getStringExtra(MainActivity.EDIT_ESSAY);
+        if(json != null) editEssay = new Gson().fromJson(json, EssayInfo.class);
 
         if(isNew){
             switchToModify();
         }
         else{
-            editText.setText(intent.getStringExtra(MainActivity.ESSAY_URL));
+//            editText.setText(intent.getStringExtra(MainActivity.ESSAY_URL));
             switchToReview();
         }
 
@@ -108,18 +113,30 @@ public class EditActivity extends AppCompatActivity {
                 if(EssayUtils.needRequestWrite(EditActivity.this)) return;
                 //save to local as cipher text or plain text
                 String content = editText.getText().toString();
-                EssayUtils.savePlaintext(EditActivity.this, EssayUtils.CurrentUsername, content, "");
+//                EssayUtils.savePlaintext(EditActivity.this, EssayUtils.CurrentUser.username, content, "");
 
-                File dir = new File(EssayUtils.RelativeUserDir);
-                if(!dir.exists()){
-                    if(!dir.mkdir())
-                        Toast.makeText(EditActivity.this, "Can't mkdir", Toast.LENGTH_SHORT).show();
-                    else{   //TODO: ./user/username/essay.json
-                        Toast.makeText(EditActivity.this, EssayUtils.RelativeUserDir, Toast.LENGTH_SHORT).show();
-
-                    }
+                EssayInfo newEssay;
+                if(isNew){
+                    newEssay = new EssayInfo();
+                    newEssay.uid = EssayUtils.CurrentUser.uid;
+                    newEssay.type = "text";
+                    newEssay.createTime = System.currentTimeMillis();
+//                    newEssay.title = title;
+                    newEssay.isPrivate = false;
                 }
-                Toast.makeText(EditActivity.this, "saved", Toast.LENGTH_SHORT).show();
+                else{
+                    newEssay = editEssay;
+                    newEssay.lastModifyTime = System.currentTimeMillis();
+//                    newEssay.isPrivate = isPrivate;
+//                    newEssay.title = title;
+                }
+
+
+                boolean result = EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew);
+
+                if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+
             }
         });
     }

@@ -3,6 +3,7 @@ package com.adamyt.essay.essay;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -234,13 +235,19 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (result.equals(SUCCESS)) {
                 String mdPassword = EssayUtils.getMD5(mPassword);
-                UserInfo user = new UserInfo(mUsername, mdPassword, EssayUtils.AbsoluteUserDir);
+                UserInfo user = new UserInfo(mUsername, mdPassword);
                 if(EssayUtils.addUser(RegisterActivity.this, user)){
                     EssayUtils.hasLoggedIn = true;
                     EssayUtils.isAuthorized = true;
-                    EssayUtils.CurrentUsername = mUsername;
-                    EssayUtils.CurrentUserPassword = mPassword;
-                    EssayUtils.CurrentUserHome = user.home;
+                    EssayUtils.CurrentUser = user;
+//                    EssayUtils.CurrentUsername = mUsername;
+//                    EssayUtils.CurrentUserPassword = mPassword;
+//                    EssayUtils.CurrentUserHome = user.home;
+                    SharedPreferences sp = getSharedPreferences("data", 0);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("currentUser", mUsername);
+                    editor.putLong("currentUid", user.uid);
+                    editor.apply();
                     finish();
                 }
                 else Toast.makeText(RegisterActivity.this, "Failed", Toast.LENGTH_SHORT).show();
