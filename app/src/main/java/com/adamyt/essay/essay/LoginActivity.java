@@ -228,7 +228,8 @@ public class LoginActivity extends AppCompatActivity {
 //            showProgress(false);
             if (result.equals(SUCCESS)){
                 EssayUtils.hasLoggedIn = true;
-                EssayUtils.isAuthorized = false;    //test
+                EssayUtils.isAuthorized = true;
+                EssayUtils.setPassword(mPassword);
 
                 SharedPreferences sp = getSharedPreferences("data", 0);
                 SharedPreferences.Editor editor = sp.edit();

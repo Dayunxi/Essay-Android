@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -35,6 +36,12 @@ public class EssayUtils {
     public static UserInfo CurrentUser;
     public static boolean hasLoggedIn = false;
     public static boolean isAuthorized = false;
+
+    private static String plainPassword = null;
+
+    public static void setPassword(String password){
+        plainPassword = password;
+    }
 
     public static ArrayList<EssayInfo> getAllPublicEssay(Context context){
         if(CurrentUser == null) return null;
@@ -61,21 +68,43 @@ public class EssayUtils {
     }
 
     public static ArrayList<EssayInfo> getAllEssay(Context context){
-        if(!hasLoggedIn || !isAuthorized) return null;
-        return null;
+        if(CurrentUser == null) return null;
+        if(needRequestWrite(context)) return null;
+        ArrayList<EssayInfo> essayList = new ArrayList<>();
+
+        String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
+        String jsonPath = currentUserHome + UserEssaysJsonName;
+
+        try {
+            // get json of user's essays
+            Gson gson = new Gson();
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(jsonPath);
+            if(byteStream!=null) jsonString = new String(byteStream);
+            EssayInfo[] essays = gson.fromJson(jsonString, EssayInfo[].class);
+            if(essays != null) Collections.addAll(essayList, essays);
+            return essayList;
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String getEssayContent(Context context, EssayInfo essayInfo){
         if(needRequestWrite(context)) return null;
         String filePath = AbsoluteUserDir + essayInfo.uid.toString() + "/" + essayInfo.url;
-        String content = null;
+        String content;
+        byte[] byteStream = readBytesFrom(filePath);
+        if(byteStream == null) return null;
         if(essayInfo.isPrivate){
+            if(!isAuthorized || plainPassword==null) return null;
 
+            byte[] cipherByte = EncryptUtils.base64Decode(essayInfo.cipherKey);
+            String essayKey = EncryptUtils.decryptAES(cipherByte, plainPassword);
+            content = EncryptUtils.decryptAES(byteStream, essayKey);
         }
-        else{
-            byte[] byteStream = readBytesFrom(filePath);
-            if(byteStream!=null) content = new String(byteStream);
-        }
+        else content = new String(byteStream);
 
         return content;
     }
@@ -89,6 +118,7 @@ public class EssayUtils {
             if(byteStream!=null) jsonString = new String(byteStream);
             UserInfo[] users =  gson.fromJson(jsonString, UserInfo[].class);
 
+            if(users==null) return null;
             for(UserInfo user : users){ // Be sure Essay.CurrentUser is independent
                 if(user.uid.equals(uid)) return (UserInfo) user.clone();
             }
@@ -186,27 +216,36 @@ public class EssayUtils {
     }
 
     private static boolean saveEssayFile(EssayInfo essayInfo, String content){
+
+        if(!isAuthorized){
+            //TODO: show authorize dialog
+            System.out.println("not authorize");
+            return false;
+        }
         String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
-        // encrypt or not
-        byte[] essayBytes = null;
         try{
+            byte[] essayBytes;
+            // encrypt or not
             if(essayInfo.isPrivate){
-                String plainKey = getRandomKey();
-                // encryption
-//            essayInfo.cipherKey = plainKey;
+                String essayKey = getRandomKey();
+                byte[] cipherByte = EncryptUtils.encryptAES(essayKey, plainPassword);
+                essayInfo.cipherKey = EncryptUtils.base64Encode(cipherByte);
+
+                essayBytes = EncryptUtils.encryptAES(content, essayKey);
             }
             else{
                 essayInfo.cipherKey = null;
                 essayBytes = content.getBytes("utf-8");
             }
+
+            // save essay's content
+            return writeBytesTo(currentUserHome+essayInfo.url, essayBytes);
         }
-        catch (UnsupportedEncodingException e){
+        catch (Exception e){
             e.printStackTrace();
+            return false;
         }
 
-
-        // save essay's content
-        return writeBytesTo(currentUserHome+essayInfo.url, essayBytes);
     }
 
     private static boolean saveModifiedEssay(EssayInfo essayInfo, String content){
@@ -268,7 +307,7 @@ public class EssayUtils {
             if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
 
             // save json
-            byteStream = gson.toJson(essays).getBytes("utf-8");
+            byteStream = gson.toJson(newEssays).getBytes("utf-8");
             if(writeBytesTo(jsonPath, byteStream)){
                 System.out.println("success");
                 return true;
@@ -296,7 +335,7 @@ public class EssayUtils {
         final int KEY_LENGTH = 16;
         final char[] charSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
         StringBuilder key = new StringBuilder(KEY_LENGTH);
-        Random rand = new Random();
+        SecureRandom rand = new SecureRandom();
         for(int i=0; i<KEY_LENGTH; i++){
             key.append(charSet[rand.nextInt(62)]);
         }

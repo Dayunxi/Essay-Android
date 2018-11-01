@@ -58,13 +58,18 @@ public class EditActivity extends AppCompatActivity {
         Intent intent  = getIntent();
         isNew = intent.getBooleanExtra(MainActivity.IS_NEW, false);
         String json = intent.getStringExtra(MainActivity.EDIT_ESSAY);
-        if(json != null) originEssayInfo = new Gson().fromJson(json, EssayInfo.class);
+        if(json != null) originEssayInfo = (new Gson()).fromJson(json, EssayInfo.class);
 
         if(originEssayInfo!=null){
             originContent = EssayUtils.getEssayContent(this, originEssayInfo);
             originTitle = originEssayInfo.title;
             editTextContent.setText(originContent);
             editTextTitle.setText(originTitle);
+
+            if(originEssayInfo.isPrivate && !EssayUtils.isAuthorized){
+                Toast.makeText(this, "Not Authorize!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
 
         if(isNew){
@@ -125,7 +130,7 @@ public class EditActivity extends AppCompatActivity {
                     newEssay.type = "text";
                     newEssay.createTime = System.currentTimeMillis();
                     newEssay.title = title;
-                    newEssay.isPrivate = false;
+                    newEssay.isPrivate = true;
 
                     String typeDir = newEssay.isPrivate? "private/text/" : "public/text/";
                     newEssay.url = typeDir + newEssay.createTime.toString() + ".md";
@@ -140,11 +145,15 @@ public class EditActivity extends AppCompatActivity {
                 System.out.println("Fix isNew: "+isNew);
                 boolean result = EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew);
 
-                if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                if(result){
+                    originContent = content;
+                    originTitle = title;
+                    isNew = false;
+                    Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                }
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();
 
-                originContent = content;
-                originTitle = title;
+
 
             }
         });

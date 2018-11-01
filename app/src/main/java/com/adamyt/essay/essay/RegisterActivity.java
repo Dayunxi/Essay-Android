@@ -227,6 +227,7 @@ public class RegisterActivity extends AppCompatActivity {
                     EssayUtils.hasLoggedIn = true;
                     EssayUtils.isAuthorized = true;
                     EssayUtils.CurrentUser = user;
+                    EssayUtils.setPassword(mPassword);
 
                     SharedPreferences sp = getSharedPreferences("data", 0);
                     SharedPreferences.Editor editor = sp.edit();

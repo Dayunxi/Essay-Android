@@ -24,16 +24,33 @@ public class EncryptUtils {
 //        String plainText = decryptAES(cipherText, password);
 //        System.out.printf("PlainText: %s\n", plainText);
 //    }
+    private static byte[] convertPassword(String password){
+        final int PWD_SIZE = 16;
+        try{
+            if (password == null) password = "";
+            StringBuilder ret = new StringBuilder(PWD_SIZE);
+            ret.append(password);
+            while (ret.length() < PWD_SIZE) ret.append("0");
+            if (ret.length() > PWD_SIZE) ret.setLength(PWD_SIZE);
 
-    public static byte[] encryptAES(String content, String password){
+            return ret.toString().getBytes("utf-8");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static byte[] encryptAES(String content, String password){
         try{
             // generate a 64bits key from password
-            KeyGenerator keygen = KeyGenerator.getInstance("AES");
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            secureRandom.setSeed(password.getBytes("utf-8"));
-            keygen.init(128, secureRandom);
-            byte[] key = keygen.generateKey().getEncoded();
+//            KeyGenerator keygen = KeyGenerator.getInstance("AES");
+//            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+//            secureRandom.setSeed(password.getBytes("utf-8"));
+//            keygen.init(128, secureRandom);
+//            byte[] key = keygen.generateKey().getEncoded();
 
+            byte[] key = convertPassword(password);
             // initialize
             SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
@@ -48,15 +65,16 @@ public class EncryptUtils {
         }
     }
 
-    public static String decryptAES(byte[] content, String password){
+    static String decryptAES(byte[] content, String password){
         try{
             // generate a 64bits key from password
-            KeyGenerator keygen = KeyGenerator.getInstance("AES");
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            secureRandom.setSeed(password.getBytes("utf-8"));
-            keygen.init(128, secureRandom);
-            byte[] key = keygen.generateKey().getEncoded();
+//            KeyGenerator keygen = KeyGenerator.getInstance("AES");
+//            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+//            secureRandom.setSeed(password.getBytes("utf-8"));
+//            keygen.init(128, secureRandom);
+//            byte[] key = keygen.generateKey().getEncoded();
 
+            byte[] key = convertPassword(password);
             // initialize
             SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
             Cipher cipher = Cipher.getInstance(AES_CIPHER_MODE);
@@ -73,10 +91,34 @@ public class EncryptUtils {
         }
     }
 
-    private static String base64Encode(byte[] cipherText){
-        return Base64.encodeToString(cipherText, Base64.DEFAULT);
+    static String base64Encode(byte[] cipherText){
+        return Base64.encodeToString(cipherText, Base64.NO_PADDING|Base64.NO_WRAP);
     }
-    private static byte[] base64Decode(String plainText){
-        return Base64.decode(plainText, Base64.DEFAULT);
+    static byte[] base64Decode(String plainText){
+        return Base64.decode(plainText, Base64.NO_PADDING|Base64.NO_WRAP);
+    }
+
+    static String byteToHex(byte[] bytes) {
+        if(bytes==null) return null;
+        final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
+        StringBuilder ret = new StringBuilder(bytes.length * 2);
+        for(byte item : bytes){
+            ret.append(HEX_DIGITS[(item>>4) & 0x0f]);
+            ret.append(HEX_DIGITS[item & 0x0f]);
+        }
+        return ret.toString();
+    }
+    static byte[] hexToByte(String str) {
+        if (str == null || str.length() < 2) {
+            return new byte[0];
+        }
+        str = str.toLowerCase();
+        int l = str.length() / 2;
+        byte[] result = new byte[l];
+        for (int i = 0; i < l; ++i) {
+            String tmp = str.substring(2 * i, 2 * i + 2);
+            result[i] = (byte) (Integer.parseInt(tmp, 16) & 0xFF);
+        }
+        return result;
     }
 }

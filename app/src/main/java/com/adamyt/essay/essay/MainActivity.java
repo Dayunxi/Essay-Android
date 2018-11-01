@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String content = editText.getText().toString();
+                        //TODO: EssayUtils.setPassword(mPassword);
                         Toast.makeText(MainActivity.this, content, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
@@ -257,7 +258,7 @@ public class MainActivity extends AppCompatActivity
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
                 intent.putExtra(IS_NEW, false);
-                intent.putExtra(EDIT_ESSAY, new Gson().toJson(essayList.get(position)));
+                intent.putExtra(EDIT_ESSAY, (new Gson()).toJson(essayList.get(position)));
 //                System.out.println(position);
                 startActivity(intent);
                 }
