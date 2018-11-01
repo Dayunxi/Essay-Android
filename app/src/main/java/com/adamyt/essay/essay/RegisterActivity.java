@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.adamyt.essay.struct.UserInfo;
 import com.adamyt.essay.utils.EssayUtils;
+import com.adamyt.essay.utils.HashUtils;
 
 
 /**
@@ -220,7 +221,7 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(false);
 
             if (result.equals(SUCCESS)) {
-                String mdPassword = EssayUtils.getMD5(mPassword);
+                String mdPassword = HashUtils.getMD5(mPassword);
                 UserInfo user = new UserInfo(mUsername, mdPassword);
                 if(EssayUtils.addUser(RegisterActivity.this, user)){
                     EssayUtils.hasLoggedIn = true;

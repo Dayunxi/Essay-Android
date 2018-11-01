@@ -31,7 +31,7 @@ public class EditActivity extends AppCompatActivity {
 
     // review or create a new essay
     private boolean isNew = false;
-    private EssayInfo editEssay = null;
+    private EssayInfo originEssayInfo = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +58,11 @@ public class EditActivity extends AppCompatActivity {
         Intent intent  = getIntent();
         isNew = intent.getBooleanExtra(MainActivity.IS_NEW, false);
         String json = intent.getStringExtra(MainActivity.EDIT_ESSAY);
-        if(json != null) editEssay = new Gson().fromJson(json, EssayInfo.class);
+        if(json != null) originEssayInfo = new Gson().fromJson(json, EssayInfo.class);
 
-        if(editEssay!=null){
-            originContent = EssayUtils.getEssayContent(this, editEssay);
-            originTitle = editEssay.title;
+        if(originEssayInfo!=null){
+            originContent = EssayUtils.getEssayContent(this, originEssayInfo);
+            originTitle = originEssayInfo.title;
             editTextContent.setText(originContent);
             editTextTitle.setText(originTitle);
         }
@@ -126,16 +126,19 @@ public class EditActivity extends AppCompatActivity {
                     newEssay.createTime = System.currentTimeMillis();
                     newEssay.title = title;
                     newEssay.isPrivate = false;
+
+                    String typeDir = newEssay.isPrivate? "private/text/" : "public/text/";
+                    newEssay.url = typeDir + newEssay.createTime.toString() + ".md";
                 }
                 else{
-                    newEssay = editEssay;
+                    newEssay = originEssayInfo;
                     newEssay.lastModifyTime = System.currentTimeMillis();
 //                    newEssay.isPrivate = isPrivate;
                     newEssay.title = title;
                 }
 
                 System.out.println("Fix isNew: "+isNew);
-                boolean result = EssayUtils.saveUserEssay(EditActivity.this, content, newEssay, isNew);
+                boolean result = EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew);
 
                 if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();

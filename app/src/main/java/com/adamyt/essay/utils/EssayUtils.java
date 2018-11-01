@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -120,7 +121,7 @@ public class EssayUtils {
         return addItemToUserJson(user);
     }
 
-    public static boolean saveUserEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
+    public static boolean saveEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
         if(!hasLoggedIn) return false;
         if(needRequestWrite(context)) return false;
         if(isNew) return saveNewEssay(essayInfo, content);
@@ -188,15 +189,21 @@ public class EssayUtils {
         String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
         // encrypt or not
         byte[] essayBytes = null;
-        if(essayInfo.isPrivate){
-            String plainKey = getRandomKey();
-            // encryption
+        try{
+            if(essayInfo.isPrivate){
+                String plainKey = getRandomKey();
+                // encryption
 //            essayInfo.cipherKey = plainKey;
+            }
+            else{
+                essayInfo.cipherKey = null;
+                essayBytes = content.getBytes("utf-8");
+            }
         }
-        else{
-            essayInfo.cipherKey = null;
-            essayBytes = content.getBytes();
+        catch (UnsupportedEncodingException e){
+            e.printStackTrace();
         }
+
 
         // save essay's content
         return writeBytesTo(currentUserHome+essayInfo.url, essayBytes);
@@ -222,9 +229,10 @@ public class EssayUtils {
                     essays[i] = essayInfo;
                 }
             }
-            String newJson = gson.toJson(essays);
+
             // save json
-            if(writeBytesTo(jsonPath, newJson.getBytes())){
+            byteStream = gson.toJson(essays).getBytes("utf-8");
+            if(writeBytesTo(jsonPath, byteStream)){
                 System.out.println("success");
                 return true;
             }
@@ -234,19 +242,13 @@ public class EssayUtils {
             e.printStackTrace();
             return false;
         }
+        catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+            return false;
+        }
     }
     private static boolean saveNewEssay(EssayInfo essayInfo, String content){
         String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
-
-        // create the url of essay
-        String typeDir = essayInfo.isPrivate? "private/text/" : "public/text/";
-        String unixTime = String.valueOf(System.currentTimeMillis());
-        String relativeFilePath = typeDir + unixTime + ".md";
-        String filePath = currentUserHome + relativeFilePath;
-
-        // member title, type, isPrivate, uid, createTime has been assigned in EditActivity.
-        essayInfo.url = relativeFilePath;
-        essayInfo.createTime = System.currentTimeMillis();
 
         if(!saveEssayFile(essayInfo, content)) return false;
 
@@ -264,15 +266,16 @@ public class EssayUtils {
             // Latest item in the top of json file
             newEssays[0] = essayInfo;
             if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
-            String newJson = gson.toJson(newEssays);
 
             // save json
-            if(writeBytesTo(jsonPath, newJson.getBytes())){
+            byteStream = gson.toJson(essays).getBytes("utf-8");
+            if(writeBytesTo(jsonPath, byteStream)){
                 System.out.println("success");
                 return true;
             }
             else{
                 //del file
+                String filePath = currentUserHome + essayInfo.url;
                 File file = new File(filePath);
                 file.delete();
                 return false;
@@ -282,86 +285,12 @@ public class EssayUtils {
             e.printStackTrace();
             return false;
         }
-    }
-
-
-    private static boolean saveEssay(EssayInfo essayInfo, String content, boolean isNew){
-        String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
-        String jsonPath = currentUserHome + UserEssaysJsonName;
-        essayInfo.createTime = System.currentTimeMillis();
-
-        // create the url of essay
-        String typeDir = essayInfo.isPrivate? "private/text/" : "public/text/";
-        String unixTime = String.valueOf(System.currentTimeMillis());
-        String relativeFilePath = typeDir + unixTime + ".md";
-        String filePath = currentUserHome + relativeFilePath;
-        essayInfo.url = relativeFilePath;
-
-        // encrypt or not
-        byte[] essayBytes = null;
-        if(essayInfo.isPrivate){
-            String plainKey = getRandomKey();
-            // encryption
-//            essayInfo.cipherKey = plainKey;
-        }
-        else{
-            essayInfo.cipherKey = null;
-            essayBytes = content.getBytes();
-        }
-
-        // save essay's content
-        if(!writeBytesTo(filePath, essayBytes)) return false;
-
-        try {
-            // get json of user's essays
-            Gson gson = new Gson();
-            String jsonString = null;
-            byte[] byteStream = readBytesFrom(jsonPath);
-            if(byteStream!=null) jsonString = new String(byteStream);
-            EssayInfo[] essays = gson.fromJson(jsonString, EssayInfo[].class);
-            System.out.println("isNew: "+isNew);
-            // append or modify
-            String newJson;
-            if(isNew){
-                int length = essays==null? 1 : essays.length+1;
-                EssayInfo[] newEssays = new EssayInfo[length];
-                // Latest item in the top of json file
-                newEssays[0] = essayInfo;
-                if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
-                newJson = gson.toJson(newEssays);
-            }
-            else{
-                System.out.println("!!!!!!!!!!!");
-                System.out.printf("Title: %s Url: %s\n", essayInfo.title, essayInfo.url);
-                if(essays==null) return false;
-                for(int i=0; i<essays.length; i++){
-                    if(essays[i].url.equals(essayInfo.url)){
-                        System.out.println("???????????????");
-                        essays[i] = essayInfo;
-                    }
-                }
-
-                newJson = gson.toJson(essays);
-                System.out.printf("Json: %s\n", newJson);
-            }
-
-            // save json
-            if(writeBytesTo(jsonPath, newJson.getBytes())){
-                System.out.println("success");
-                return true;
-            }
-            else{
-                //del file
-                File file = new File(filePath);
-                file.delete();
-                return false;
-            }
-        }
-        catch (JsonSyntaxException e){
+        catch (UnsupportedEncodingException e){
             e.printStackTrace();
             return false;
         }
     }
+
 
     private static String getRandomKey(){
         final int KEY_LENGTH = 16;
@@ -373,35 +302,6 @@ public class EssayUtils {
         }
         return key.toString();
     }
-
-//    public static boolean savePlaintext(Context context, String username, String content, String title){
-//        if(!hasLoggedIn) return false;
-//        if(needRequestWrite(context)) return false;
-//        if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-//        String homePath = AbsoluteUserDir + username + "/public/text/";
-//        String unixTime = String.valueOf(System.currentTimeMillis());
-//        String filePath = homePath + unixTime + ".md";
-//
-//        return writeBytesTo(filePath, content.getBytes());
-//    }
-//    // TODO: AES & JSON & MD5
-//    public static boolean saveCiphertext(Context context, String content, String title){
-//        if(!hasLoggedIn) return false;
-//        if(needRequestWrite(context)) return false;
-//        if(title == null) title = context.getResources().getString(R.string.essay_untitled);
-//        String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
-//        String homePath = currentUserHome + "/private/text/";
-//        String unixTime = String.valueOf(System.currentTimeMillis());
-//        String filePath = homePath + unixTime + ".md";
-//
-//        byte[] plainText = content.getBytes();
-//        // encryption
-//        byte[] cipherText = null;
-//
-//        writeBytesTo(filePath, cipherText);
-////        addItemToEssayJson(filePath, title, "text", null);
-//        return false;
-//    }
 
 
     //TODO: create a new user
@@ -420,63 +320,41 @@ public class EssayUtils {
             newUsers[0] = user;
             if(users!=null) System.arraycopy(users, 0, newUsers, 1, length-1);
 
-            String newJson = gson.toJson(newUsers);
-            return writeBytesTo(AbsoluteUserJsonPath, newJson.getBytes());
+            byteStream = gson.toJson(newUsers).getBytes("utf-8");
+            return writeBytesTo(AbsoluteUserJsonPath, byteStream);
         }
         catch (JsonSyntaxException e){
             e.printStackTrace();
             return false;
         }
+        catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    //    private static boolean addItemToEssayJson(String url, String title, String type, String cipherKey){
-//        if(!hasLoggedIn) return false;
-//        String jsonPath = CurrentUser.home + UserEssaysJsonName;
-//        EssayInfo essay = new EssayInfo(url, CurrentUser.uid, title, type, cipherKey);
+
+//    public static String getMD5(String s) {
 //        try {
-//            Gson gson = new Gson();
-//            String jsonString = null;
-//            byte[] byteStream = readBytesFrom(jsonPath);
-//
-//            if(byteStream!=null) jsonString = new String(byteStream);
-//            EssayInfo[] essays = gson.fromJson(jsonString, EssayInfo[].class);
-//            int length = essays==null? 1 : essays.length+1;
-//            EssayInfo[] newEssays = new EssayInfo[length];
-//
-//            // Latest item in the top of json file
-//            newEssays[0] = essay;
-//            if(essays!=null) System.arraycopy(essays, 0, newEssays, 1, length-1);
-//
-//            String newJson = gson.toJson(newEssays);
-//            return writeBytesTo(jsonPath, newJson.getBytes());
+//            MessageDigest md5 = MessageDigest.getInstance("MD5");
+//            byte[] bytes = md5.digest(s.getBytes("utf-8"));
+//            return byteToHex(bytes);
 //        }
-//        catch (JsonSyntaxException e){
-//            e.printStackTrace();
-//            return false;
+//        catch (Exception e) {
+//            return null;
 //        }
 //    }
-
-
-
-
-    public static String getMD5(String s) {
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            byte[] bytes = md5.digest(s.getBytes());
-            return toHex(bytes);
-        }
-        catch (Exception e) {
-            return null;
-        }
-    }
-    private static String toHex(byte[] bytes) {
-        final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
-        StringBuilder ret = new StringBuilder(bytes.length * 2);
-        for(byte item : bytes){
-            ret.append(HEX_DIGITS[(item>>4) & 0x0f]);
-            ret.append(HEX_DIGITS[item & 0x0f]);
-        }
-        return ret.toString();
-    }
+//    private static String byteToHex(byte[] bytes) {
+//        final char[] HEX_DIGITS = "0123456789ABCDEF".toCharArray();
+//        StringBuilder ret = new StringBuilder(bytes.length * 2);
+//        for(byte item : bytes){
+//            ret.append(HEX_DIGITS[(item>>4) & 0x0f]);
+//            ret.append(HEX_DIGITS[item & 0x0f]);
+//        }
+//        return ret.toString();
+//    }
+//    private static byte[] hexToByte(String hex){
+//        return null;
+//    }
 
 }

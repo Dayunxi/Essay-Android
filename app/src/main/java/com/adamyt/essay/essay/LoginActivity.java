@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.adamyt.essay.struct.UserInfo;
 import com.adamyt.essay.utils.EssayUtils;
+import com.adamyt.essay.utils.HashUtils;
 
 import java.util.List;
 
@@ -207,7 +208,7 @@ public class LoginActivity extends AppCompatActivity {
                 for (UserInfo user : AllUsers) {
                     if (user.username.equals(mUsername)) {
                         // Account exists, return true if the password matches.
-                        String mdPassword = EssayUtils.getMD5(mPassword);
+                        String mdPassword = HashUtils.getMD5(mPassword);
                         if(user.password.equals(mdPassword)){
                             EssayUtils.CurrentUser = (UserInfo) user.clone();
                             if(EssayUtils.CurrentUser != null) System.out.println("Login Success NOT NULL");
