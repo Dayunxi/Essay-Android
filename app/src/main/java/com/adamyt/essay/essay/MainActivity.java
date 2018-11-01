@@ -256,11 +256,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                intent.putExtra(IS_NEW, true);
+                intent.putExtra(IS_NEW, false);
                 intent.putExtra(EDIT_ESSAY, new Gson().toJson(essayList.get(position)));
-                System.out.println(position);
-
-//                startActivity(intent);
+//                System.out.println(position);
+                startActivity(intent);
                 }
             });
             essayAdapter = new EssayAdapter();

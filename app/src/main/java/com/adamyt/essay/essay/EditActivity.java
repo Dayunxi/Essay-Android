@@ -26,7 +26,8 @@ public class EditActivity extends AppCompatActivity {
     private Toolbar reviewBar, modifyBar;
     private EditText editTextContent;
     private EditText editTextTitle;
-    private String originText = null;
+    private String originContent = null;
+    private String originTitle = null;
 
     // review or create a new essay
     private boolean isNew = false;
@@ -59,6 +60,13 @@ public class EditActivity extends AppCompatActivity {
         String json = intent.getStringExtra(MainActivity.EDIT_ESSAY);
         if(json != null) editEssay = new Gson().fromJson(json, EssayInfo.class);
 
+        if(editEssay!=null){
+            originContent = EssayUtils.getEssayContent(this, editEssay);
+            originTitle = editEssay.title;
+            editTextContent.setText(originContent);
+            editTextTitle.setText(originTitle);
+        }
+
         if(isNew){
             switchToModify();
         }
@@ -88,8 +96,11 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // if not new and not modify?
-                String currentText = editTextContent.getText().toString();
-                if(isNew&&!currentText.equals("") || !isNew&&!currentText.equals(originText)){
+                String currentContent = editTextContent.getText().toString();
+                String currentTitle = editTextTitle.getText().toString();
+                boolean isEmpty = currentContent.equals("") || currentTitle.equals("");
+                boolean isModified = !currentContent.equals(originContent) || !currentTitle.equals(originTitle);
+                if(isNew&&!isEmpty || !isNew&&isModified){
                     draftConfirm();
                 }
                 else{
@@ -123,11 +134,14 @@ public class EditActivity extends AppCompatActivity {
                     newEssay.title = title;
                 }
 
-
+                System.out.println("Fix isNew: "+isNew);
                 boolean result = EssayUtils.saveUserEssay(EditActivity.this, content, newEssay, isNew);
 
                 if(result) Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+
+                originContent = content;
+                originTitle = title;
 
             }
         });
@@ -158,6 +172,12 @@ public class EditActivity extends AppCompatActivity {
         editTextContent.setCursorVisible(false);
         editTextContent.setEnabled(false);
         editTextContent.setTextColor(Color.BLACK);
+        editTextTitle.setFocusable(false);
+        editTextTitle.setFocusableInTouchMode(false);
+        editTextTitle.setCursorVisible(false);
+        editTextTitle.setEnabled(false);
+        editTextTitle.setTextColor(Color.BLACK);
+
         reviewBar.setVisibility(View.VISIBLE);
         modifyBar.setVisibility(View.GONE);
     }
@@ -166,6 +186,10 @@ public class EditActivity extends AppCompatActivity {
         editTextContent.setFocusableInTouchMode(true);
         editTextContent.setCursorVisible(true);
         editTextContent.setEnabled(true);
+        editTextTitle.setFocusable(true);
+        editTextTitle.setFocusableInTouchMode(true);
+        editTextTitle.setCursorVisible(true);
+        editTextTitle.setEnabled(true);
         modifyBar.setVisibility(View.VISIBLE);
         reviewBar.setVisibility(View.GONE);
         editTextContent.requestFocus();
@@ -202,7 +226,8 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dialog.dismiss();
                 if(!isNew){
-                    editTextContent.setText(originText);
+                    editTextContent.setText(originContent);
+                    editTextTitle.setText(originTitle);
                     switchToReview();
                 }
                 else finish();
@@ -214,7 +239,8 @@ public class EditActivity extends AppCompatActivity {
                 saveAsDraft();
                 dialog.dismiss();
                 if(!isNew){
-                    editTextContent.setText(originText);
+                    editTextContent.setText(originContent);
+                    editTextTitle.setText(originTitle);
                     switchToReview();
                     Toast.makeText(EditActivity.this, "switch to review mode", Toast.LENGTH_SHORT).show();
                 }
