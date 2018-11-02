@@ -13,6 +13,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
@@ -26,12 +27,14 @@ public class EditActivity extends AppCompatActivity {
     private Toolbar reviewBar, modifyBar;
     private EditText editTextContent;
     private EditText editTextTitle;
+    private Switch editPrivateSwitch;
+
     private String originContent = null;
     private String originTitle = null;
-
+    private EssayInfo originEssayInfo = null;
     // review or create a new essay
     private boolean isNew = false;
-    private EssayInfo originEssayInfo = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,7 @@ public class EditActivity extends AppCompatActivity {
         modifyBar = findViewById(R.id.modify_toolbar);
         editTextContent = findViewById(R.id.editEssay);
         editTextTitle = findViewById(R.id.editTitle);
+        editPrivateSwitch = findViewById(R.id.editPrivateSwitch);
         textViewBack = findViewById(R.id.editor_activity_back);
         textViewModify = findViewById(R.id.editor_activity_modify);
         textViewCancel = findViewById(R.id.editor_activity_cancel);
@@ -65,6 +69,7 @@ public class EditActivity extends AppCompatActivity {
             originTitle = originEssayInfo.title;
             editTextContent.setText(originContent);
             editTextTitle.setText(originTitle);
+            editPrivateSwitch.setChecked(originEssayInfo.isPrivate);
 
             if(originEssayInfo.isPrivate && !EssayUtils.isAuthorized){
                 Toast.makeText(this, "Not Authorize!", Toast.LENGTH_SHORT).show();
@@ -130,7 +135,7 @@ public class EditActivity extends AppCompatActivity {
                     newEssay.type = "text";
                     newEssay.createTime = System.currentTimeMillis();
                     newEssay.title = title;
-                    newEssay.isPrivate = true;
+                    newEssay.isPrivate = editPrivateSwitch.isChecked();
 
                     String typeDir = newEssay.isPrivate? "private/text/" : "public/text/";
                     newEssay.url = typeDir + newEssay.createTime.toString() + ".md";
@@ -138,22 +143,25 @@ public class EditActivity extends AppCompatActivity {
                 else{
                     newEssay = originEssayInfo;
                     newEssay.lastModifyTime = System.currentTimeMillis();
-//                    newEssay.isPrivate = isPrivate;
+                    newEssay.isPrivate = editPrivateSwitch.isChecked();
                     newEssay.title = title;
                 }
 
-                System.out.println("Fix isNew: "+isNew);
-                boolean result = EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew);
-
-                if(result){
+                if(!EssayUtils.hasLoggedIn){
+                    Toast.makeText(EditActivity.this, "Please login", Toast.LENGTH_SHORT).show();
+                }
+                else if(newEssay.isPrivate && !EssayUtils.isAuthorized){
+                    Toast.makeText(EditActivity.this, "Please authorize to save private essay", Toast.LENGTH_SHORT).show();
+                }
+                else if(EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew)){
+                    originEssayInfo = newEssay;     // newEssay could change in saveEssay()
                     originContent = content;
                     originTitle = title;
                     isNew = false;
+                    switchToReview();
                     Toast.makeText(EditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 }
                 else Toast.makeText(EditActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-
-
 
             }
         });
@@ -189,6 +197,7 @@ public class EditActivity extends AppCompatActivity {
         editTextTitle.setCursorVisible(false);
         editTextTitle.setEnabled(false);
         editTextTitle.setTextColor(Color.BLACK);
+        editPrivateSwitch.setClickable(false);
 
         reviewBar.setVisibility(View.VISIBLE);
         modifyBar.setVisibility(View.GONE);
@@ -202,6 +211,8 @@ public class EditActivity extends AppCompatActivity {
         editTextTitle.setFocusableInTouchMode(true);
         editTextTitle.setCursorVisible(true);
         editTextTitle.setEnabled(true);
+        editPrivateSwitch.setClickable(true);
+
         modifyBar.setVisibility(View.VISIBLE);
         reviewBar.setVisibility(View.GONE);
         editTextContent.requestFocus();

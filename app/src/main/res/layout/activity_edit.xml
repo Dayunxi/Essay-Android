@@ -22,23 +22,32 @@
         android:layout_marginTop="@dimen/default_margin"
         app:layout_constraintTop_toBottomOf="@+id/edit_activity_include">
 
+        <EditText
+            android:id="@+id/editTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/editor_title_placeholder"
+            android:inputType="textPersonName" />
+
+        <Switch
+            android:id="@+id/editPrivateSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:checked="true"/>
         <TextView
             android:id="@+id/edit_activity_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginEnd="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:text="@string/editor_title"
+            android:text="@string/editor_private_show"
             android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/editTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName" />
     </LinearLayout>
 
 

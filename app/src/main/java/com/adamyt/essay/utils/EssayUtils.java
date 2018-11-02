@@ -152,7 +152,7 @@ public class EssayUtils {
     }
 
     public static boolean saveEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
-        if(!hasLoggedIn) return false;
+        if(!hasLoggedIn || essayInfo.isPrivate&&!isAuthorized) return false;
         if(needRequestWrite(context)) return false;
         if(isNew) return saveNewEssay(essayInfo, content);
         return saveModifiedEssay(essayInfo, content);
@@ -216,12 +216,6 @@ public class EssayUtils {
     }
 
     private static boolean saveEssayFile(EssayInfo essayInfo, String content){
-
-        if(!isAuthorized){
-            //TODO: show authorize dialog
-            System.out.println("not authorize");
-            return false;
-        }
         String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
         try{
             byte[] essayBytes;
