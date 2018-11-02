@@ -33,6 +33,7 @@
     <string name="confirm_yes">Save</string>
     <string name="confirm_no">Don\'t Save</string>
     <string name="confirm_cancel">Cancel</string>
+    <string name="confirm_authorize">Authorize</string>
 
     <!--String related to essay list in main activity-->
     <string name="essay_untitled">Untitled</string>

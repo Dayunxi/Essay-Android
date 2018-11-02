@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
             // TODO: authorize dialog
             case R.id.nav_authorize:
                 System.out.println("nav_authorize");
-                showAuthorizeDialog();
+                if(EssayUtils.hasLoggedIn) showAuthorizeDialog();
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
@@ -171,26 +171,35 @@ public class MainActivity extends AppCompatActivity
 
     private void showAuthorizeDialog(){
         View view = View.inflate(this, R.layout.authorize_input, null);
-        final EditText editText = view.findViewById(R.id.authorize_password);
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        final EditText passwordText = view.findViewById(R.id.authorize_password);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Authorize")//设置对话框的标题
                 .setView(view)
-                .setNegativeButton(R.string.confirm_no, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.confirm_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setPositiveButton(R.string.confirm_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String content = editText.getText().toString();
-                        //TODO: EssayUtils.setPassword(mPassword);
-                        Toast.makeText(MainActivity.this, content, Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                }).create();
+                .setPositiveButton(R.string.confirm_authorize, null).create();
+
         dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String password = passwordText.getText().toString();
+                if(EssayUtils.userLogin(EssayUtils.CurrentUser, password)){
+                    Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                }
+                else{
+                    passwordText.setError(getString(R.string.error_incorrect_password));
+//                    Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_SHORT).show();
+                    passwordText.requestFocus();
+                }
+            }
+        });
     }
 
     // load essay and user or logout

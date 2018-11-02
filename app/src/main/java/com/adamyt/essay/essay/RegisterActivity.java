@@ -42,8 +42,6 @@ public class RegisterActivity extends AppCompatActivity {
     private View mProgressView;
     private View mRegisterFormView;
 
-    private UserInfo[] AllUsers;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +72,6 @@ public class RegisterActivity extends AppCompatActivity {
         mRegisterFormView = findViewById(R.id.register_form);
         mProgressView = findViewById(R.id.register_progress);
 
-        AllUsers = EssayUtils.getUserList(this);
     }
 
 
@@ -182,6 +179,7 @@ public class RegisterActivity extends AppCompatActivity {
      * the user.
      */
     public class UserRegisterTask extends AsyncTask<Void, Void, Integer> {
+        private final Integer FAILURE = -1;
         private final Integer SUCCESS = 0;
         private final Integer ERR_EXIST_USER = 1;
 
@@ -203,16 +201,12 @@ public class RegisterActivity extends AppCompatActivity {
 //            } catch (InterruptedException e) {
 //                return false;
 //            }
-            if(AllUsers!=null){
-                for (UserInfo user : AllUsers) {
-                    if (user.username.equals(mUsername)) return ERR_EXIST_USER;
-                }
-            }
+            if(EssayUtils.isUsernameExist(RegisterActivity.this, mUsername))
+                return ERR_EXIST_USER;
 
-            // TODO: register the new account here.
-//            UserInfo newUser = new UserInfo(mUsername, mPassword);
-
-            return SUCCESS;
+            UserInfo user = new UserInfo(mUsername, HashUtils.getMD5(mPassword));
+            if(EssayUtils.addUser(RegisterActivity.this, user)) return SUCCESS;
+            else return FAILURE;
         }
 
         @Override
@@ -221,27 +215,22 @@ public class RegisterActivity extends AppCompatActivity {
             showProgress(false);
 
             if (result.equals(SUCCESS)) {
-                String mdPassword = HashUtils.getMD5(mPassword);
-                UserInfo user = new UserInfo(mUsername, mdPassword);
-                if(EssayUtils.addUser(RegisterActivity.this, user)){
-                    EssayUtils.hasLoggedIn = true;
-                    EssayUtils.isAuthorized = true;
-                    EssayUtils.CurrentUser = user;
-                    EssayUtils.setPassword(mPassword);
-
+                // auto login
+                if(EssayUtils.userLogin(RegisterActivity.this, mUsername, mPassword)){
                     SharedPreferences sp = getSharedPreferences("data", 0);
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("currentUser", mUsername);
-                    editor.putLong("currentUid", user.uid);
+                    editor.putLong("currentUid", EssayUtils.CurrentUser.uid);
                     editor.apply();
-                    finish();
                 }
-                else Toast.makeText(RegisterActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-            } else if(result.equals(ERR_EXIST_USER)) {
+                finish();
+            }
+            else if(result.equals(ERR_EXIST_USER)) {
                 mUsernameView.setError(getString(R.string.error_exist_username));
                 mUsernameView.requestFocus();
                 Toast.makeText(RegisterActivity.this, "Failed", Toast.LENGTH_SHORT).show();
             }
+            else Toast.makeText(RegisterActivity.this, "Failed", Toast.LENGTH_SHORT).show();
         }
 
         @Override

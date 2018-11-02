@@ -2,6 +2,7 @@ package com.adamyt.essay.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
@@ -33,11 +34,12 @@ public class EssayUtils {
     private final static String UserEssaysJsonName = "essays.json";
 
     public final static int REQUEST_WRITE_SOTRAGE = 0;
-    public static UserInfo CurrentUser;
+    public static UserInfo CurrentUser; // Object CurrentUser should be independent, not a reference
     public static boolean hasLoggedIn = false;
     public static boolean isAuthorized = false;
 
     private static String plainPassword = null;
+    private static UserInfo[] AllUsers = null;
 
     public static void setPassword(String password){
         plainPassword = password;
@@ -109,41 +111,11 @@ public class EssayUtils {
         return content;
     }
 
-    public static UserInfo getUserInfo(Context context, Long uid){
-        if(needRequestWrite(context)) return null;
-        try {
-            Gson gson = new Gson();
-            String jsonString = null;
-            byte[] byteStream = readBytesFrom(AbsoluteUserJsonPath);
-            if(byteStream!=null) jsonString = new String(byteStream);
-            UserInfo[] users =  gson.fromJson(jsonString, UserInfo[].class);
-
-            if(users==null) return null;
-            for(UserInfo user : users){ // Be sure Essay.CurrentUser is independent
-                if(user.uid.equals(uid)) return (UserInfo) user.clone();
-            }
-        }
-        catch (JsonSyntaxException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static UserInfo[] getUserList(Context context){
-        if(needRequestWrite(context)) return null;
-        try {
-            Gson gson = new Gson();
-            String jsonString = null;
-            byte[] byteStream = readBytesFrom(AbsoluteUserJsonPath);
-
-            if(byteStream!=null) jsonString = new String(byteStream);
-
-            return gson.fromJson(jsonString, UserInfo[].class);
-        }
-        catch (JsonSyntaxException e){
-            e.printStackTrace();
-        }
-        return null;
+    public static boolean saveEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
+        if(!hasLoggedIn || essayInfo.isPrivate&&!isAuthorized) return false;
+        if(needRequestWrite(context)) return false;
+        if(isNew) return saveNewEssay(essayInfo, content);
+        return saveModifiedEssay(essayInfo, content);
     }
 
     public static boolean addUser(Context context, UserInfo user){
@@ -151,12 +123,66 @@ public class EssayUtils {
         return addItemToUserJson(user);
     }
 
-    public static boolean saveEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
-        if(!hasLoggedIn || essayInfo.isPrivate&&!isAuthorized) return false;
-        if(needRequestWrite(context)) return false;
-        if(isNew) return saveNewEssay(essayInfo, content);
-        return saveModifiedEssay(essayInfo, content);
+    public static UserInfo getUserInfo(Context context, Long uid){
+        if(needRequestWrite(context)) return null;
+        AllUsers = getUserList();
+        if(AllUsers==null) return null;
+        for(UserInfo user : AllUsers){ // Be sure Essay.CurrentUser is independent
+            if(user.uid.equals(uid)) return (UserInfo) user.clone();
+        }
+        return null;
     }
+
+    public static boolean isUsernameExist(Context context, String username){
+        if(needRequestWrite(context)) return false;
+        AllUsers = getUserList();
+        if(AllUsers==null) return false;
+        for (UserInfo user : AllUsers) {
+            if (user.username.equals(username)) return true;
+        }
+        return false;
+    }
+
+    public static boolean userLogin(Context context, String username, String password){
+        if(needRequestWrite(context)) return false;
+        AllUsers = getUserList();
+        if(AllUsers==null) return false;
+        for (UserInfo user : AllUsers) {
+            if (user.username.equals(username)) {
+                // Account exists, return userInfo if the password matches.
+                String md5Password = HashUtils.getMD5(password);
+                if(user.password.equals(md5Password)){
+                    CurrentUser = (UserInfo) user.clone();
+                    isAuthorized = true;
+                    hasLoggedIn = true;
+                    setPassword(password);
+
+                    return true;
+                }
+                else return false;
+            }
+        }
+        return false;
+    }
+
+    public static boolean userLogin(UserInfo user, String password){
+        if(user==null) return false;
+        String md5Password = HashUtils.getMD5(password);
+        if(!user.password.equals(md5Password)) return false;
+
+        CurrentUser = (UserInfo) user.clone();
+        isAuthorized = true;
+        hasLoggedIn = true;
+        setPassword(password);
+        return true;
+    }
+
+    public static boolean checkPassword(String password){
+        if(CurrentUser==null) return false;
+        String mdPassword = HashUtils.getMD5(password);
+        return CurrentUser.password.equals(mdPassword);
+    }
+
 
 
     private static boolean needRequestWrite(Context context) {
@@ -213,6 +239,22 @@ public class EssayUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static UserInfo[] getUserList(){
+        try {
+            Gson gson = new Gson();
+            String jsonString = null;
+            byte[] byteStream = readBytesFrom(AbsoluteUserJsonPath);
+
+            if(byteStream!=null) jsonString = new String(byteStream);
+
+            return gson.fromJson(jsonString, UserInfo[].class);
+        }
+        catch (JsonSyntaxException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static boolean saveEssayFile(EssayInfo essayInfo, String content){

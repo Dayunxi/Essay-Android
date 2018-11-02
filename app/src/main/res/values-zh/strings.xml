@@ -33,6 +33,7 @@
     <string name="confirm_yes">保存</string>
     <string name="confirm_no">不保存</string>
     <string name="confirm_cancel">取消</string>
+    <string name="confirm_authorize">验证</string>
 
     <!--String related to essay list in main activity-->
     <string name="essay_untitled">无题</string>

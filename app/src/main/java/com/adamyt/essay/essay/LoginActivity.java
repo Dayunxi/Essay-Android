@@ -39,8 +39,6 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
-    private UserInfo[] AllUsers;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        AllUsers = EssayUtils.getUserList(this);
     }
 
 
@@ -190,7 +187,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Integer> {
         private final Integer SUCCESS = 0;
-        private final Integer ERR_EXIST_USER = 1;
+        private final Integer ERR_NOT_EXIST_USER = 1;
         private final Integer ERR_INCORRECT_PASSWD = 2;
 
         private final String mUsername;
@@ -204,22 +201,12 @@ public class LoginActivity extends AppCompatActivity {
         // Thread doInBackground() cannot update UI
         @Override
         protected Integer doInBackground(Void... params) {
-            if(AllUsers!=null){
-                for (UserInfo user : AllUsers) {
-                    if (user.username.equals(mUsername)) {
-                        // Account exists, return true if the password matches.
-                        String mdPassword = HashUtils.getMD5(mPassword);
-                        if(user.password.equals(mdPassword)){
-                            EssayUtils.CurrentUser = (UserInfo) user.clone();
-                            if(EssayUtils.CurrentUser != null) System.out.println("Login Success NOT NULL");
-                            else System.out.println("Login Success NULL");
-                            return SUCCESS;
-                        }
-                        else return ERR_INCORRECT_PASSWD;
-                    }
-                }
-            }
-            return ERR_EXIST_USER;
+            if(!EssayUtils.isUsernameExist(LoginActivity.this, mUsername))
+                return ERR_NOT_EXIST_USER;
+            if(EssayUtils.userLogin(LoginActivity.this, mUsername, mPassword))
+                return SUCCESS;
+            else
+                return ERR_INCORRECT_PASSWD;
         }
 
         @Override
@@ -227,10 +214,6 @@ public class LoginActivity extends AppCompatActivity {
             mAuthTask = null;
 //            showProgress(false);
             if (result.equals(SUCCESS)){
-                EssayUtils.hasLoggedIn = true;
-                EssayUtils.isAuthorized = true;
-                EssayUtils.setPassword(mPassword);
-
                 SharedPreferences sp = getSharedPreferences("data", 0);
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("currentUser", mUsername);
@@ -242,7 +225,7 @@ public class LoginActivity extends AppCompatActivity {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
-            else if(result.equals(ERR_EXIST_USER)){
+            else if(result.equals(ERR_NOT_EXIST_USER)){
                 mUsernameView.setError(getString(R.string.error_nonexistent_username));
                 mUsernameView.requestFocus();
             }
