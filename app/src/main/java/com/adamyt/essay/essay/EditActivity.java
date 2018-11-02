@@ -138,18 +138,17 @@ public class EditActivity extends AppCompatActivity {
                     newEssay = new EssayInfo();
                     newEssay.uid = EssayUtils.CurrentUser.uid;
                     newEssay.type = "text";
-                    newEssay.createTime = System.currentTimeMillis();
                     newEssay.title = title;
                     newEssay.isPrivate = editPrivateSwitch.isChecked();
-
-                    String typeDir = newEssay.isPrivate? "private/text/" : "public/text/";
-                    newEssay.url = typeDir + newEssay.createTime.toString() + ".md";
+                    newEssay.setCreateTime();
+                    newEssay.setUrl();
                 }
                 else{
-                    newEssay = originEssayInfo;
+                    newEssay = (EssayInfo) originEssayInfo.clone();
                     newEssay.lastModifyTime = System.currentTimeMillis();
                     newEssay.isPrivate = editPrivateSwitch.isChecked();
                     newEssay.title = title;
+                    newEssay.setUrl();
                 }
 
                 if(!EssayUtils.hasLoggedIn){
@@ -159,6 +158,11 @@ public class EditActivity extends AppCompatActivity {
                     Toast.makeText(EditActivity.this, "Please authorize to save private essay", Toast.LENGTH_SHORT).show();
                 }
                 else if(EssayUtils.saveEssay(EditActivity.this, content, newEssay, isNew)){
+                    if(newEssay.isPrivate!=originEssayInfo.isPrivate){
+                        EssayUtils.deleteOriginEssayFile(EditActivity.this, originEssayInfo);
+                        System.out.printf("Delete origin file %s\n", originEssayInfo.url);
+                    }
+
                     originEssayInfo = newEssay;     // newEssay could change in saveEssay()
                     originContent = content;
                     originTitle = title;

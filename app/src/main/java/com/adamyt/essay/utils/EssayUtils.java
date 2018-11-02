@@ -2,7 +2,6 @@ package com.adamyt.essay.utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
@@ -19,11 +18,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -109,6 +106,14 @@ public class EssayUtils {
         else content = new String(byteStream);
 
         return content;
+    }
+
+    public static boolean deleteOriginEssayFile(Context context, EssayInfo essayInfo){
+        if(!hasLoggedIn || !isAuthorized) return false;
+        if(needRequestWrite(context)) return false;
+        String currentUserHome = AbsoluteUserDir + CurrentUser.uid.toString() + "/";
+        String filePath = currentUserHome+essayInfo.url;
+        return deleteFile(filePath);
     }
 
     public static boolean saveEssay(Context context, String content, EssayInfo essayInfo, boolean isNew){
@@ -198,6 +203,12 @@ public class EssayUtils {
         }
         ActivityCompat.requestPermissions((Activity)context, new String[]{WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_SOTRAGE);
         return true;
+    }
+
+
+    private static boolean deleteFile(String filePath){
+        File file = new File(filePath);
+        return file.delete();
     }
 
     private static boolean writeBytesTo(String filePath, byte[] byteStream){
@@ -300,7 +311,7 @@ public class EssayUtils {
 
             if(essays==null) return false;
             for(int i=0; i<essays.length; i++){
-                if(essays[i].url.equals(essayInfo.url)){
+                if(essays[i].createTime.equals(essayInfo.createTime)){
                     essays[i] = essayInfo;
                 }
             }

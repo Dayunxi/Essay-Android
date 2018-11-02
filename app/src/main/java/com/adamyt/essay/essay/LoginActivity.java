@@ -17,9 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.adamyt.essay.struct.UserInfo;
 import com.adamyt.essay.utils.EssayUtils;
-import com.adamyt.essay.utils.HashUtils;
 
 import java.util.List;
 
