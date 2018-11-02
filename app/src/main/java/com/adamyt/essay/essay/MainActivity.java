@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_drafts:
                 System.out.println("nav_drafts");
-                EssayUtils.getAllEssay(this);
+                Toast.makeText(this, "This button can do nothing yet OvO", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_register:
                 System.out.println("nav_register");
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity
 //                break;
             case R.id.nav_setting:
                 System.out.println("nav_setting");
-                Toast.makeText(this, Environment.getExternalStorageDirectory().toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "This button can do nothing yet OvO", Toast.LENGTH_SHORT).show();
                 break;
 //            case R.id.nav_about:
 //                System.out.println("nav_about");
