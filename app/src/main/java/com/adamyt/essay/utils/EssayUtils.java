@@ -190,7 +190,7 @@ public class EssayUtils {
 
 
 
-    private static boolean needRequestWrite(Context context) {
+    public static boolean needRequestWrite(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return false;
         }

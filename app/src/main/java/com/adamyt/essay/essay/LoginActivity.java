@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.adamyt.essay.struct.EssayInfo;
 import com.adamyt.essay.utils.EssayUtils;
 
 import java.util.List;
@@ -118,6 +119,8 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
 //            showProgress(true);
+            if(EssayUtils.needRequestWrite(this)) return;
+
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }

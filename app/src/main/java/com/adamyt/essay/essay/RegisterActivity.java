@@ -121,6 +121,7 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user register attempt.
+            if(EssayUtils.needRequestWrite(this)) return;
             showProgress(true);
             mAuthTask = new UserRegisterTask(username, password);
             mAuthTask.execute((Void) null);
